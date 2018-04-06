@@ -1,0 +1,60 @@
+<!doctype html>
+<title>WALL E WORLD</title>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+
+
+
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='materialize/css/materialize.min.css') }}" media="screen,projection" />
+<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+<!--Let browser know website is optimized for mobile-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+
+<body>
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='materialize/js/materialize.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='scripts.js')}}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='jquery.tablesorter.min.js')}}"></script>
+
+
+    <div class=page>
+        <nav>
+            <div class="nav-wrapper">
+                <ul id="nav-mobile" class="left hide-on-med-and-down">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/browseitems">Browse Items</a></li>
+                    <li><a href="/browsestores">Browse Stores</a></li>
+                    <!--<li><a href="#">Test1</a></li>-->
+                    <!--        <li><a href="#">Test1</a></li>-->
+                </ul>
+
+
+                <ul id="nav-mobile" class="right hide-on-med-and-down">
+                    <li> {% if session.username %} Logged in as: {{session.username}} {% endif %}
+                    </li>
+                    <li><a href="{{url_for('login')}}">      {% if not session.username %}Login{%else%}Logout{%endif%}</a></li>
+                    <li><a href="{{url_for('register')}}">Register</a></li>
+                </ul>
+            </div>
+        </nav>
+        {% for message in get_flashed_messages() %}
+        <div class=flash>{{ message }}</div>
+        {% endfor %}
+        <div class="container">
+            <center>
+            <a href="/">
+                    <h1 class="w">WALLE</h1>
+                    <h1>*</h1>
+                    <h1 class="m">WORLD</h1>
+            </a>
+            </center>
+            <br>
+            {% block body %} {% endblock %}
+
+
+        </div>
+    </div>
+</body>

@@ -1,0 +1,40 @@
+{% extends "layout.html" %} {% block body %}
+
+<h4 id="store">{{inv[0].store}}</h4>
+<h3 id="city">{{inv[0].city}}</h3>
+<table class="striped tablesorter" id="storestock">
+    <thead>
+        <tr>
+            <th>update</th>
+            <th>pic</th>
+            <th>name</th>
+            <th>sku</th>
+            <th>upc</th>
+            <th>stock</th>
+            <th>price</th>
+            <th>msrp</th>
+            <th>drop</th>
+            <th>category</th>
+            <th>updated</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in inv %}
+        <tr>
+        <td><button class="waves-effect waves-light amber darken-2 btn-small" onclick="updateStore()">UPDATE</button></td>
+        <td><img src="{{item.thumbnailImage}}" /></td>
+        <td>{{item.name}}</td>
+        <td><a href="/item?sku={{item.sku}}">{{item.sku}}</a></td>
+        <td> <a href="http://barcode.live/?upc={{item.upc}}">{{item.upc}}</a></td>
+        <td>{{item.qty}}</td>
+        <td>${{item.price}}</td>
+        <td>${{item.salePrice}}</td>
+        <td>{{item.droppy}}%</td>
+        <td>{{item.categoryPath}}</td>
+        <td>{{item.datetime}}</td>
+        </tr>
+        {%endfor%}
+    </tbody>
+</table>
+
+{% endblock %}

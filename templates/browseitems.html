@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+{% block title %} Browse Items{% endblock %}
+{% block body %}
+
+<h2>All Items</h2>
+<table class="tablesorter striped" id="allitems">
+
+    <thead>
+        <tr>
+            <th>add</th>
+            <th>pic</th>
+            <th>count</th>
+            <th>min price</th>
+            <th>std price</th>
+            <th>best drop</th>
+            <th>sku</th>
+            <th>name</th>
+            <th>category</th>
+            <th>num searches</th>
+        </tr>
+    </thead>
+    <tbody>
+        {%for item in database%}
+        <tr>
+            <td><button class="waves-effect waves-light amber darken-2 btn-small" id="{{item.sku}}.add" onclick="addItem()">ADD</button></td>
+            <td><img src="{{item.thumbnailImage}}" /></td>
+            <td>{{item.count}}</td>
+            <td>{{item.min}}</td>
+            <td>{{item.salePrice}}</td>
+            <td>{{item.bestDrop}}%</td>
+            <td><a href="/item?sku={{item.sku}}">{{item.sku}}</a></td>
+            <td>{{item.name}}</td>
+            <td>{{item.categoryPath}}</td>
+            <td>{{item.numsearches}}</td>
+        </tr>
+        {%endfor%}
+    </tbody>
+</table>
+{% endblock %}

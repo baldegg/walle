@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block title %} Results {% endblock %}
+{% block body %}
+
+    {% for item in inv %}
+    <div class="item {% if item.salePrice > item.price %} dropped {%endif%}
+    {% if (item.price/item.salePrice)<0.5 %} superdrop {%endif%}
+    ">
+        <img src="{{item.thumbnailImage}}"/><br>
+        #<a href="/store?store={{item.store}}">{{item.store}}</a> - {{item.city}}<br>
+        {{item.name}}<br>
+        sku: <a href="/item?sku={{item.sku}}">{{item.sku}}</a> upc: {{item.upc}}<br>
+        {{item.qty}} in stock - ${{item.price}}<br>
+        {{item.datetime}}
+    </div>
+    {%endfor%}
+
+
+
+
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% block body %}
+
+
+<div class="progress">
+    <div class="indeterminate"></div>
+</div>
+<div class="content">
+    <center>
+        <form action="/search" method="post" id="search">
+            <button class="waves-effect waves-light amber darken-2 btn-large" type="submit" onclick="loading();">Search for all items at all stores below!</button>
+        </form>
+    </center>
+    <div class="row">
+        <div class="col s8">
+
+            <h2>Items To Search</h2>
+            <form action="/lookup" method="post" id="lookup">
+                <b>Enter SKUs and/or Walmart.com or Brickseek.com links separated by newline. Check to remove items.</b>
+                <div class="form-group">
+                    <textarea name="skus" rows="25" cols="50" form="lookup" placeholder="SKUS"></textarea>
+                </div>
+                <p>
+                    <button class="waves-effect waves-light blue btn" type="submit" onclick="loading();">Update Items</button>
+                </p>
+
+                <table>
+                    <tr>
+                        <th>X</th>
+                        <th>sku</th>
+                        <th>name</th>
+                    </tr>
+                    {%for item in items%}
+                    <tr>
+                        <td><input type="checkbox" id="{{item.sku}}" name="{{item.sku}}" /><label for="{{item.sku}}"></label></td>
+                        <td><a href="/item?sku={{item.sku}}">{{item.sku}}</a></td>
+                        <td>{{item.name}}</td>
+                    </tr>
+                    {%endfor%}
+                </table>
+            </form>
+        </div>
+        <div class="col s4">
+            <h2>Stores</h2>
+
+            <form action="/stores" method="post" id="stores">
+                <b>Enter Zip Code to Add Stores. Check to remove stores.</b>
+                <div class="form-group">
+                    <input name="z" type="text" placeholder="Zip Code" form="stores" />
+                </div>
+                <button class="waves-effect waves-light blue btn" type="submit" onclick="loading();">Update Stores</button>
+                <table>
+                    <tr>
+                        <th>X</th>
+                        <th>id</th>
+                        <th>address</th>
+                    </tr>
+
+                    {%for store in stores%}
+                    <tr>
+                        <td><input type="checkbox" id="{{store.id}}" name="{{store.id}}" /><label for="{{store.id}}"></label></td>
+                        <td><a href="/store?store={{store.id}}">{{store.id}}</a></td>
+                        <td>{{store.city}}, {{store.state}} - {{store.street}}</td>
+                    </tr>
+                    {%endfor%}
+                </table>
+            </form>
+
+
+        </div>
+    </div>
+    {% endblock %}
+</div>
+</div>
