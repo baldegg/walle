@@ -5,8 +5,12 @@
 //   }
 // }
 
+
+
 $(document).ready(function()
     {
+        $.fn.editable.defaults.mode = 'inline';     
+        $('#salePriceAdmin').editable();
         $("#allitems").tablesorter();
         $("#allstores").tablesorter();
         $("#iteminv").tablesorter();
@@ -53,6 +57,7 @@ function updateStore() {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
+      console.log(this.responseText);
       var updated = JSON.parse(this.responseText);
       $(document.activeElement).parent().parent().children()[5].innerText = updated['qty'];
       $(document.activeElement).parent().parent().children()[6].innerText = "$" + updated['price'];
@@ -92,4 +97,12 @@ function addStore() {
 function loadStores(){
   loading();
    var sku = $(document.activeElement)[0]['id'].replace('.add','');
+}
+
+function confirmDelete(){
+      $(".confirm").show();
+}
+
+function showEdit(){
+      $(".edit").show();
 }

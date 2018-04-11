@@ -1,0 +1,25 @@
+{% extends "layout.html" %} {% block body %}
+
+
+<table id="users" class="tablesorter">
+    <thead>
+        <tr>
+            <th>user</th>
+            <th>email</th>
+            <th>level</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td><a href="/admin/users?user={{user.username}}">{{user.username}}</a></td>
+            <td>{{user.email}}</td>
+            <td>{{user.level}}</td>
+        </tr>
+        {%endfor%}
+    </tbody>
+</table>
+
+
+
+{% endblock %}

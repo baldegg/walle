@@ -5,6 +5,14 @@
     margin:10px;
 }
 
+.confirm{
+    display:none;
+}
+
+.edit{
+    display:none;
+}
+
 .item.dropped{
      border: 5px solid green;
 }

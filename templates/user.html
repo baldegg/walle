@@ -1,0 +1,22 @@
+{% extends "layout.html" %} {% block body %}
+
+
+<form class action="/admin/users" method="post" id="adminUsers">
+
+    <input type="hidden" name="uid" value="{{user[0].uid}}" />
+        <input id="username" name="username" value="{{user[0].username}}">
+        <label for="username">Username</label>
+        <input id="level" name="level" value="{{user[0].level}}">
+        <label for="level">Level</label>
+        <input id="email" name="email" value="{{user[0].email}}">
+        <label for="email">Email</label>
+        <br>
+        <br>
+    <button type="submit" class="waves-effect waves-light amber darken-1 btn-large" name="updateUser" value="Update" />Update User</button>
+    <button type="submit" class="waves-effect waves-light amber darken-2 btn-large" name="resetPass" value="Reset" />Reset Password</button>
+    <button type="button" class="waves-effect waves-light red btn-large" value="Delete" onClick="confirmDelete()" />Delete User</button> <button type="submit" name="confirm" class="confirm waves-effect waves-light red darken-2 btn-large" value="Delete" />Confirm Delete</button>
+
+</form>
+
+
+{% endblock %}

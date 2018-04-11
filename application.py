@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import json
+import config
 from flask import Flask, request, session, g, redirect, url_for, abort, jsonify, render_template, flash
 from flask_session import Session
 from werkzeug.exceptions import default_exceptions
@@ -15,10 +16,12 @@ from flask_debugtoolbar import DebugToolbarExtension
 app = Flask(__name__)
 app.config.from_object(__name__)
 
+SECRET_KEY = config.VARS['SECRET_KEY']
+
 # Load default config and override config from an environment variable
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path, 'walle.db'),
-    DEBUG_TB_INTERCEPT_REDIRECTS=False
+    DEBUG_TB_INTERCEPT_REDIRECTS=False,
 ))
 
 # enable debugger toolbar
@@ -113,9 +116,10 @@ def login():
         print(user["uid"])
         session["user_id"] = user["uid"]
         session["username"] = user['username']
-
+        session["level"] = user['level']
         # Redirect user to home page
         flash(f"Logged in as ({session['username']})!")
+        print(session['level'])
         return redirect("/")
 
     # User reached route via GET (as by clicking a link or via redirect)
@@ -176,8 +180,8 @@ def browseitems():
     """Shows entire database of items users have searched for, along with some interesting data"""
     db = get_db()
     database = query_db('SELECT sku, itemData.name, thumbnailImage, categoryPath, numsearches, itemData.upc, SUM(qty) as count, MIN(price) as min, salePrice,\
-                        ROUND((100*(1 - MIN(price*1.0)/salePrice*1.0)),1) as bestDrop from itemData INNER JOIN inventory on inventory.upc = itemData.upc\
-                        GROUP BY inventory.upc HAVING count > 0  ORDER BY datetime DESC')
+                        ROUND((100*(1 - MIN(price*1.0)/salePrice*1.0)),1) as bestDrop from itemData LEFT JOIN inventory on inventory.upc = itemData.upc\
+                        GROUP BY inventory.upc ORDER BY datetime DESC')
     return render_template("browseitems.html", database=database)
 
 
@@ -186,8 +190,7 @@ def browseitems():
 def browsestores():
     """Show all stores and allow user to add to personal list"""
     db = get_db()
-    stores = query_db(
-        'SELECT storesToSearch.id as id, city, state, street, zip FROM storesToSearch INNER JOIN stores on stores.id = storesToSearch.id GROUP BY storesToSearch.id')
+    stores = query_db('SELECT id, city, state, street, zip FROM stores')
     return render_template("browsestores.html", stores=stores)
 
 
@@ -248,8 +251,8 @@ def lookup():
                 # If not indexed, lookup item Data and add to itemData and itemsToSearch
                 item = wmLabsLookup(sku)
                 if item:
-                    db.execute('INSERT or IGNORE INTO itemData (sku, name, upc, msrp, salePrice, categoryNode, categoryPath, thumbnailImage)\
-                                values (?, ?, ?, ?, ?, ?, ?, ?)', [item['sku'], item['name'], item['upc'], item['msrp'], item['salePrice'], item['categoryNode'], item['categoryPath'], item['thumbnailImage']])
+                    db.execute('INSERT or IGNORE INTO itemData (sku, name, upc, msrp, salePrice, categoryNode, categoryPath, thumbnailImage, numsearches)\
+                                values (?, ?, ?, ?, ?, ?, ?, ?, ?)', [item['sku'], item['name'], item['upc'], item['msrp'], item['salePrice'], item['categoryNode'], item['categoryPath'], item['thumbnailImage'], 0])
                     db.execute('INSERT or IGNORE INTO itemsToSearch (uid, sku, name, upc) values (?, ?, ?, ?)',
                                 [session["user_id"], item['sku'], item['name'], item['upc']])
     for key in request.form:
@@ -314,11 +317,13 @@ def search():
 @app.route('/update', methods=['POST'])
 @login_required
 def update():
+    
     """Updates inventory data passed via jQuery"""
     # gets item and store from jquery request
     toUpdate = json.loads(request.data)
+    print(toUpdate)
     # looks up item
-    result = invLookup(toUpdate['upc'], toUpdate['store'])['data'][0]
+    result = invLookup(toUpdate['upc'],toUpdate['store'])['data'][0]
     db = get_db()
     # updates inventory database with new info
     try:
@@ -387,6 +392,59 @@ def admin():
     else: 
         return render_template("sorry.html", message="You're no administrator!")
 
+@app.route('/admin/users', methods=['GET', 'POST'])
+@login_required
+def users():
+    """Admin page"""
+    db= get_db()
+    level = query_db('SELECT level FROM users where uid=?',[session["user_id"]],one=True)['level']
+    #if an admin is logged in
+    if level > 1:
+            if request.method=="GET":
+                #if a user is specified
+                if request.args.get("user"):
+                    user = query_db('SELECT * FROM users where username=?',[request.args.get("user")])
+                    if user:
+                        return render_template("user.html", user=user)
+                    else:
+                        return render_template("sorry.html", message="User not found!")
+                else:
+                    users = query_db('SELECT * FROM users')
+                    return render_template("users.html", users=users)
+            elif request.method=="POST":
+                uid = request.form.get("uid")
+                if request.form.get("confirm") == "Delete":
+                    db.execute('DELETE FROM users WHERE uid=?',[uid])
+                    db.execute('DELETE FROM itemsToSearch WHERE uid=?',[uid])
+                    db.execute('DELETE FROM storesToSearch WHERE uid=?',[uid])
+                    db.commit()
+                    flash(f"Deleted User #{uid}!")
+                    return redirect("/admin/users")
+                elif request.form.get("updateUser") == "Update":
+                    username = request.form.get("username")
+                    email = request.form.get("email")
+                    try:
+                        level = int(request.form.get("level"))
+                    except ValueError:
+                        return render_template("sorry.html", message="Invalid level")
+                    print(level)
+                    if level == 1 or level == 2:
+                        try: 
+                            db.execute('UPDATE users SET username = ?, email = ?, level = ? WHERE uid=?',[username, email, level, uid])
+                            db.commit()
+                        except sqlite3.IntegrityError:
+                            return render_template("sorry.html", message="Username already exists")
+                    else: 
+                        return render_template("sorry.html", message="Invalid level")
+                elif request.form.get("resetPass") == "Reset":
+                    TEMP_PW="ChangeMe123!"
+                    tempHash = generate_password_hash(TEMP_PW)
+                    db.execute('UPDATE users SET hash = ? where uid=?',[tempHash,uid])
+                    db.commit()
+                    return redirect("/admin/users")
+    else: 
+        return render_template("sorry.html", message="You're no administrator!")
+
 
 # @app.route('/delete', methods=['POST'])
 # @login_required
@@ -397,13 +455,11 @@ def admin():
 #     for key in request.form:
 #         print(key)
 #         upc = query_db('SELECT upc FROM itemData WHERE sku=?',(key,))[0]['upc']
-#         c.execute('DELETE FROM itemData WHERE sku=?',(key,))
-#         c.execute('DELETE FROM itemsToSearch WHERE sku=?',(key,))
+        # c.execute('DELETE FROM itemData WHERE sku=?',(key,))
+        # c.execute('DELETE FROM itemsToSearch WHERE sku=?',(key,))
 #         if upc:
 #             c.execute('DELETE FROM inventory WHERE upc=?',(upc,))
 #     db.commit()
 #     return redirect(url_for('index'))
 
-app.run(host=os.getenv('IP', 'http://walleworld-baldegg.c9users.io/'),port=int(os.getenv('PORT', 8080)), debug=True)
-
-
+app.run(host = '0.0.0.0', port=8080, debug=True)

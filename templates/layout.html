@@ -35,8 +35,10 @@
                 <ul id="nav-mobile" class="right hide-on-med-and-down">
                     <li> {% if session.username %} Logged in as: {{session.username}} {% endif %}
                     </li>
-                    <li><a href="{{url_for('login')}}">      {% if not session.username %}Login{%else%}Logout{%endif%}</a></li>
-                    <li><a href="{{url_for('register')}}">Register</a></li>
+                    <li><a href="{{url_for('login')}}">      {% if not session.username %}Login <li><a href="{{url_for('register')}}">Register</a></li>
+                    {%else%}Logout{%endif%}</a></li>
+                    {% if session.level == 2 %}<li><a href="{{url_for('admin')}}">Admin</a></li>{%endif%}
+                   
                 </ul>
             </div>
         </nav>

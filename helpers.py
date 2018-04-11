@@ -3,9 +3,10 @@ from functools import wraps
 from flask import redirect, session
 import re
 import os
+import config
 
-apiKey =  os.environ['wmLabsApiKey']
-searchUrl = os.environ['searchUrl']
+apiKey =  config.VARS['wmLabsApiKey']
+searchUrl =  config.VARS['searchUrl']
 
 
 # pretend to be a droid
