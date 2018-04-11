@@ -9,8 +9,6 @@
 
 $(document).ready(function()
     {
-        $.fn.editable.defaults.mode = 'inline';     
-        $('#salePriceAdmin').editable();
         $("#allitems").tablesorter();
         $("#allstores").tablesorter();
         $("#iteminv").tablesorter();
