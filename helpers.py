@@ -68,7 +68,7 @@ def wmLabsLookup(sku):
                 "salePrice": r['salePrice'] if 'salePrice' in r else "-1",
                 "categoryNode": r['categoryNode'],
                 "categoryPath": r['categoryPath'],
-                "thumbnailImage": r['thumbnailImage']
+                "thumbnailImage": r['thumbnailImage'] if 'thumbnailImage' in r else "noImage.jpg"
             }
         else:
             item = None
