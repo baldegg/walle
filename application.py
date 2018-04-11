@@ -432,6 +432,7 @@ def users():
                         try: 
                             db.execute('UPDATE users SET username = ?, email = ?, level = ? WHERE uid=?',[username, email, level, uid])
                             db.commit()
+                            return redirect("/admin/users")
                         except sqlite3.IntegrityError:
                             return render_template("sorry.html", message="Username already exists")
                     else: 
@@ -462,4 +463,7 @@ def users():
 #     db.commit()
 #     return redirect(url_for('index'))
 
-app.run(host = '0.0.0.0', port=8080, debug=True)
+if "__name__" == "__main"__:
+    app.run(host = '0.0.0.0')
+else:
+    app.run(host = '0.0.0.0', port=8080, debug=True)
