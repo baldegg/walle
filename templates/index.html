@@ -1,5 +1,4 @@
-{% extends "layout.html" %}
-{% block body %}
+{% extends "layout.html" %} {% block body %}
 
 
 <div class="progress">
@@ -23,20 +22,23 @@
                 <p>
                     <button class="waves-effect waves-light blue btn" type="submit" onclick="loading();">Update Items</button>
                 </p>
-
-                <table>
-                    <tr>
-                        <th>X</th>
-                        <th>sku</th>
-                        <th>name</th>
-                    </tr>
-                    {%for item in items%}
-                    <tr>
-                        <td><input type="checkbox" id="{{item.sku}}" name="{{item.sku}}" /><label for="{{item.sku}}"></label></td>
-                        <td><a href="/item?sku={{item.sku}}">{{item.sku}}</a></td>
-                        <td>{{item.name}}</td>
-                    </tr>
-                    {%endfor%}
+                <table id="itemsToSearch">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" name="allItems" id="allItems" class="masterCheck"><label for="allItems"></label></th>
+                            <th>sku</th>
+                            <th>name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {%for item in items%}
+                        <tr>
+                            <td><input type="checkbox" id="{{item.sku}}" class="slaveCheck" name="{{item.sku}}" /><label for="{{item.sku}}"></label></td>
+                            <td><a href="/item?sku={{item.sku}}">{{item.sku}}</a></td>
+                            <td>{{item.name}}</td>
+                        </tr>
+                        {%endfor%}
+                    </tbody>
                 </table>
             </form>
         </div>
@@ -51,14 +53,15 @@
                 <button class="waves-effect waves-light blue btn" type="submit" onclick="loading();">Update Stores</button>
                 <table>
                     <tr>
-                        <th>X</th>
+                        <th><input type="checkbox" name="allStires" id="allStores" class="masterCheck"><label for="allStores"></label></th>
+
                         <th>id</th>
                         <th>address</th>
                     </tr>
 
                     {%for store in stores%}
                     <tr>
-                        <td><input type="checkbox" id="{{store.id}}" name="{{store.id}}" /><label for="{{store.id}}"></label></td>
+                        <td><input type="checkbox" id="{{store.id}}" name="{{store.id}}" class="slaveCheck" /><label for="{{store.id}}"></label></td>
                         <td><a href="/store?store={{store.id}}">{{store.id}}</a></td>
                         <td>{{store.city}}, {{store.state}} - {{store.street}}</td>
                     </tr>

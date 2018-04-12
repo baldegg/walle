@@ -1,27 +1,28 @@
-// function toggle(source) {
-//   checkboxes = document.getElementsByName('foo');
-//   for(var i=0, n=checkboxes.length;i<n;i++) {
-//     checkboxes[i].checked = source.checked;
-//   }
-// }
+/* global $*/
 
 
 
-$(document).ready(function()
-    {
-        $("#allitems").tablesorter();
-        $("#allstores").tablesorter();
-        $("#iteminv").tablesorter();
-        $("#storestock").tablesorter();
-        $("#users").tablesorter();
-        $("#adminitems").tablesorter();
-    }
-);
+$(document).ready(function() {
+  $("#allitems").tablesorter();
+  $("#allstores").tablesorter();
+  $("#iteminv").tablesorter();
+  $("#storestock").tablesorter();
+  $("#users").tablesorter();
+  $("#adminitems").tablesorter();
 
-function loading(){
-    console.log("loading")
-    $(".progress").show();
-    $(".content").hide();
+
+  $('.masterCheck').click(function() {
+    $(this).closest('table').find('.slaveCheck').each(function() {
+      $(this).click();
+    });
+  });
+  
+});
+
+function loading() {
+  console.log("loading");
+  $(".progress").show();
+  $(".content").hide();
 }
 
 
@@ -29,8 +30,8 @@ function updateInv() {
   var store = $(document.activeElement).parent().next()[0].innerText;
   var upc = $("#upc")[0].innerText;
   var data = {
-    "store" : store,
-    "upc" : upc
+    "store": store,
+    "upc": upc
   }
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
@@ -49,8 +50,8 @@ function updateStore() {
   var upc = $(document.activeElement).parent().parent().children()[4].innerText;
   var store = $('#store')[0].innerText;
   var data = {
-    "store" : store,
-    "upc" : upc
+    "store": store,
+    "upc": upc
   }
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
@@ -67,7 +68,7 @@ function updateStore() {
 }
 
 function addItem() {
-  var sku = $(document.activeElement)[0]['id'].replace('.add','');
+  var sku = $(document.activeElement)[0]['id'].replace('.add', '');
   console.log(sku);
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
@@ -80,7 +81,7 @@ function addItem() {
 }
 
 function addStore() {
-  var store = $(document.activeElement)[0]['id'].replace('.add','');
+  var store = $(document.activeElement)[0]['id'].replace('.add', '');
   console.log(store);
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
@@ -92,15 +93,15 @@ function addStore() {
   xhttp.send(store);
 }
 
-function loadStores(){
+function loadStores() {
   loading();
-   var sku = $(document.activeElement)[0]['id'].replace('.add','');
+  var sku = $(document.activeElement)[0]['id'].replace('.add', '');
 }
 
-function confirmDelete(){
-      $(".confirm").show();
+function confirmDelete() {
+  $(".confirm").show();
 }
 
-function showEdit(){
-      $(".edit").show();
+function showEdit() {
+  $(".edit").show();
 }
