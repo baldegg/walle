@@ -59,7 +59,7 @@ def wmLabsLookup(sku):
     url = f"http://api.walmartlabs.com/v1/items/{sku}?format=json&apikey={apiKey}"
     r = requests.get(url).json()
     if r:
-        if not 'errors' in r:
+        if not 'errors' in r and 'upc' in r:
             item = {
                 "sku": r['itemId'],
                 "name": r['name'],

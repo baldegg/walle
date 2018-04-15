@@ -1,12 +1,46 @@
 {% extends "layout.html" %}
 {% block title %} Browse Items{% endblock %}
 {% block body %}
+  <center>
+{% if numitems and not category%}
 
-<h2>All Items</h2>
+<h2>All {{numitems[0]}} Items</h2>
+  Sort by: <a href="/browseitems?sortby=numsearches">Number of Searches</a> | <a href="/browseitems?sortby=bestdrop">Best Drop</a> 
+  <form id ="itemsearch" action="/browseitems" method="post">
+      <input type="text" id="itemsearch" name="itemsearch" placeholder="Search">
+  </form>
+
+  <ul class="pagination">
+      {% if page != 1 %}
+    <li class="waves-effect"><a href="/browseitems?page={{page -1}}&sortby={{sortby}}"><i class="material-icons">chevron_left</i></a></li>
+    {% else %}
+    <li class="waves-effect disabled"><a href="#"><i class="material-icons">chevron_left</i></a></li>
+    {%endif%}
+{% for pg in range ((numitems[0] / 100)|round(0,'ceil')|int) %}
+    <li class="waves-effect {% if pg + 1 == page %} active {%endif%}"><a href="/browseitems?page={{pg +1}}&sortby={{sortby}}">{{pg + 1}}</a></li>
+{% endfor%}
+    {% if page != ((numitems[0] / 100)|round(0,'ceil')|int)%}
+    <li class="waves-effect"><a href="/browseitems?page={{page +1}}&sortby={{sortby}}"><i class="material-icons">chevron_right</i></a></li>
+    {%else%}
+    <li class="disabled waves-effect"><a href="#"><i class="material-icons">chevron_right</i></a></li>
+    {%endif%}
+  </ul>
+
+{%elif category%}
+<h2>Items in Category</h2>
+<a href="/browseitems">See all items</a>
+{%else%}
+<h2>Search results for "{{query}}"</h2>
+<a href="/browseitems">See all items</a>
+{%endif%}
+  </center>
 <table class="tablesorter striped" id="allitems">
 
     <thead>
         <tr>
+            {%if level > 1%}
+            <th>delete</th>
+            {%endif%}
             <th>add</th>
             <th>pic</th>
             <th>count</th>
@@ -22,6 +56,10 @@
     <tbody>
         {%for item in database%}
         <tr>
+            {%if level>1%}
+            <td><button onclick="confirmDelete()" type="button">Delete</button>
+            <button class="confirm" onclick="adminDelete({{item.sku}})">Confirm</button></td>
+            {%endif%}
             <td><button class="waves-effect waves-light amber darken-2 btn-small" id="{{item.sku}}.add" onclick="addItem()">ADD</button></td>
             <td><img src="{{item.thumbnailImage}}" /></td>
             <td>{{item.count}}</td>
@@ -30,10 +68,27 @@
             <td>{{item.bestDrop}}%</td>
             <td><a href="/item?sku={{item.sku}}">{{item.sku}}</a></td>
             <td>{{item.name}}</td>
-            <td>{{item.categoryPath}}</td>
+            <td><a href="/browseitems?category={{item.categoryNode}}">{{item.categoryPath}}</a></td>
             <td>{{item.numsearches}}</td>
         </tr>
         {%endfor%}
     </tbody>
 </table>
+{% if numitems and not category%}<center>
+  <ul class="pagination">
+      {% if page != 1 %}
+    <li class="waves-effect"><a href="/browseitems?page={{page -1}}&sortby={{sortby}}"><i class="material-icons">chevron_left</i></a></li>
+    {% else %}
+    <li class="waves-effect disabled"><a href="#"><i class="material-icons">chevron_left</i></a></li>
+    {%endif%}
+{% for pg in range ((numitems[0] / 100)|round(0,'ceil')|int) %}
+    <li class="waves-effect {% if pg + 1 == page %} active {%endif%}"><a href="/browseitems?page={{pg +1}}&sortby={{sortby}}">{{pg + 1}}</a></li>
+{% endfor%}
+    {% if page != ((numitems[0] / 100)|round(0,'ceil')|int)%}
+    <li class="waves-effect"><a href="/browseitems?page={{page +1}}&sortby={{sortby}}"><i class="material-icons">chevron_right</i></a></li>
+    {%else%}
+    <li class="disabled waves-effect"><a href="#"><i class="material-icons">chevron_right</i></a></li>
+    {%endif%}
+  </ul></center>
+{% endif%}
 {% endblock %}

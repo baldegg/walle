@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+{% block title %} Browse Items{% endblock %}
+{% block body %}
+
+<h2>Latest Price Drops</h2>
+{% for drop in yourdrops %}
+<img src="{{drop[0].thumbnailImage}}"\>
+<h5>{{ drop[0].name }}</h5>
+<table class="dropTable">
+<thead>
+<th>old price</th>
+<th>new price</th>
+<th>% drop</th>
+<th>store #</th>
+<th>store city</th>
+<th>store state</th>
+<th>qty left</th>
+<th>date drop noticed</th>
+</thead>
+<tbody>
+{% for key in drop %}
+<tr>
+</tbody>
+<td>${{key.old_price}}</td>
+<td>${{key.new_price}}</td>
+<td>{{1 - key.new_price/key.old_price}}</td>
+<td>{{key.store_id}}</td>
+<td>{{key.city}}</td>
+<td>{{key.state}}</td>
+<td>{{key.qty}}</td><td>{{key.datetime}}</td>
+</tr>
+{%endfor%}
+</tbody>
+</table>
+<br>
+{% endfor %}
+
+{% endblock %}

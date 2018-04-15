@@ -42,6 +42,16 @@ create table itemData(
   numsearches integer
 );
 
+create table priceDrops(
+drop_id numeric primary key autoincrement,
+upc numeric not null,
+store_id numeric not null,
+old_price numeric not null,
+new_price numeric not null,
+qty numeric not null,
+datetime timestamp not null
+);
+
 create table inventory (
   upc numeric not null,
   store integer not null,

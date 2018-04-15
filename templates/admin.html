@@ -1,53 +1,14 @@
 {% extends "layout.html" %} 
 {% block body %}
 
-
-<table id="users" class="tablesorter">
-    <thead>
-        <tr>
-            <th>user</th>
-            <th>email</th>
-            <th>level</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for user in users %}
-        <tr>
-            <td><a href="/admin/users?user={{user.username}}">{{user.username}}</a></td>
-            <td>{{user.email}}</td>
-            <td>{{user.level}}</td>
-        </tr>
-        {%endfor%}
-    </tbody>
-</table>
-
+<link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/jquery-editable/css/jquery-editable.css" rel="stylesheet"/>
+<script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/jquery-editable/js/jquery-editable-poshytip.min.js"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='admin.js')}}"></script>
+<h2><a href="/admin/users">Users</a></h2> <br>
+<h2><a href="/admin/items">Items</a></h2> <br>
 
 <br>
-<table id="adminitems" class="tablesorter">
-    <thead>
-        <tr>
-            <th>pic</th>
-            <th>std price</th>
 
-            <th>sku</th>
-            <th>name</th>
-            <th>category</th>
-            <th>num searches</th>
-        </tr>
-    </thead>
-    <tbody>
-        {%for item in items%}
-        <tr>
-            <td><img src="{{item.thumbnailImage}}" /></td>
-            <td><a href="#" id="salePriceAdmin" data-type="text" data-pk="{{item.sku}}" data-url="/post" data-title="Enter username">{{item.salePrice}}</a></td>
-            <td><a href="/item?sku={{item.sku}}">{{item.sku}}</a></td>
-            <td>{{item.name}}</td>
-            <td>{{item.categoryPath}}</td>
-            <td>{{item.numsearches}}</td>
-        </tr>
-        {%endfor%}
-    </tbody>
-</table>
 
 
 {% endblock %}

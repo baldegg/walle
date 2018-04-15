@@ -9,16 +9,30 @@ $(document).ready(function() {
   $("#storestock").tablesorter();
   $("#users").tablesorter();
   $("#adminitems").tablesorter();
-
-
   $('.masterCheck').click(function() {
     $(this).closest('table').find('.slaveCheck').each(function() {
       $(this).click();
     });
   });
-  
+
 });
 
+
+  var slider = document.getElementById('test-slider');
+  noUiSlider.create(slider, {
+   start: [20, 80],
+   connect: true,
+   step: 1,
+   orientation: 'horizontal', // 'horizontal' or 'vertical'
+   range: {
+     'min': 0,
+     'max': 100
+   },
+   format: wNumb({
+     decimals: 0
+   })
+  });
+  
 function loading() {
   console.log("loading");
   $(".progress").show();
@@ -81,8 +95,7 @@ function addItem() {
 }
 
 function addStore() {
-  var store = $(document.activeElement)[0]['id'].replace('.add', '');
-  console.log(store);
+  var store = $(document.activeElement)[0]['id'].replace('.add', ''); 
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
@@ -98,10 +111,22 @@ function loadStores() {
   var sku = $(document.activeElement)[0]['id'].replace('.add', '');
 }
 
-function confirmDelete() {
-  $(".confirm").show();
-}
 
+function confirmDelete(){
+  $(document.activeElement).next('button').toggle();
+}
 function showEdit() {
   $(".edit").show();
+}
+
+function adminDelete(sku) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      $(document.activeElement).text("DELETED!");
+      $(document.activeElement).closest('tr').css("display","none");
+    }
+  };
+  xhttp.open("POST", "/delete");
+  xhttp.send(sku);
 }

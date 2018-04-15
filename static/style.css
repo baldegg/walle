@@ -1,111 +1,149 @@
-.item{
-    display:inline-block;
-    width:300px;
-    border:1px solid black;
-    margin:10px;
+.item {
+    display: inline-block;
+    width: 300px;
+    border: 1px solid #bbbbbb;
+    border-radius: 5px;
+    box-shadow: 5px 5px #dddddd;
+    margin: 10px;
+
 }
 
-.confirm{
-    display:none;
+.confirm {
+    display: none;
 }
 
-.edit{
-    display:none;
+.edit {
+    display: none;
 }
 
-.item.dropped{
-     border: 5px solid green;
+.item.dropped {
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#f8ffe8+0,e3f5ab+82,cadd85+100 */
+    background: #f8ffe8;
+    /* Old browsers */
+    background: -moz-linear-gradient(top, #f8ffe8 0%, #e3f5ab 82%, #cadd85 100%);
+    /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #f8ffe8 0%, #e3f5ab 82%, #cadd85 100%);
+    /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #f8ffe8 0%, #e3f5ab 82%, #cadd85 100%);
+    /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f8ffe8', endColorstr='#cadd85', GradientType=0);
+    /* IE6-9 */
 }
 
-.item.superdrop{
-    background: #a9dfbf ;
+.item.superdrop {
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#e6f0a3+0,d2e638+50,c3d825+51,dbf043+100;Green+Gloss+%232 */
+    background: #e6f0a3;
+    /* Old browsers */
+    background: -moz-linear-gradient(top, #e6f0a3 0%, #d2e638 50%, #c3d825 51%, #dbf043 100%);
+    /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #e6f0a3 0%, #d2e638 50%, #c3d825 51%, #dbf043 100%);
+    /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #e6f0a3 0%, #d2e638 50%, #c3d825 51%, #dbf043 100%);
+    /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e6f0a3', endColorstr='#dbf043', GradientType=0);
+    /* IE6-9 */
 }
 
-h1.w{
-    color:#1c75cf;
-    display:inline-block;
+h1.w {
+    color: #1c75cf;
+    display: inline-block;
 }
-h1.m{
-    color:#ffb619;
-    display:inline-block;
+
+h1.m {
+    color: #ffb619;
+    display: inline-block;
 }
-h1{
-    display:inline-block;
+
+h1 {
+    display: inline-block;
 }
-td{
-    padding:0;
+
+td {
+    padding: 0;
     border: 1px solid #bbbbbb;
 }
 
-.flash{
-    text-align:center;
-    font-weight:bold;
-    background:white;
+.flash {
+    text-align: center;
+    font-weight: bold;
+    background: white;
 }
 
-.progress{
-    display:none;
+.progress {
+    display: none;
 }
 
-nav{
-    background-color:#0879c9;
+nav {
+    background-color: #0879c9;
 }
-.container{
-    width:95%;
-}.item{
-    display:inline-block;
-    width:300px;
-    border:1px solid black;
-    margin:10px;
+
+.container {
+    width: 95%;
 }
-h1.w{
-    color:#1c75cf;
-    display:inline-block;
+
+h1.w {
+    color: #1c75cf;
+    display: inline-block;
 }
-h1.m{
-    color:#ffb619;
-    display:inline-block;
+
+h1.m {
+    color: #ffb619;
+    display: inline-block;
 }
-h1{
-    display:inline-block;
+
+h1 {
+    display: inline-block;
 }
-td{
-    padding:0;
+
+td {
+    padding: 0;
     border: 1px solid #bbbbbb;
 }
 
-.flash{
-    text-align:center;
-    font-weight:bold;
-    background:white;
+.flash {
+    text-align: center;
+    font-weight: bold;
+    background: white;
 }
 
-.progress{
-    display:none;
+.progress {
+    display: none;
 }
 
-nav{
-    background-color:#0879c9;
+nav {
+    background-color: #0879c9;
 }
-.container{
-    width:95%;
+
+.container {
+    width: 95%;
 }
 
 /* tables */
+
 table.tablesorter thead tr .header {
-	background-image: url(bg.gif);
-	background-repeat: no-repeat;
-	cursor: pointer;
+    background-image: url(bg.gif);
+    background-repeat: no-repeat;
+    cursor: pointer;
 }
 
 
 table.tablesorter thead tr .headerSortUp {
-	background-image: url(asc.gif);
-}
-table.tablesorter thead tr .headerSortDown {
-	background-image: url(desc.gif);
-}
-table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
-background-color: #eeeeee;
+    background-image: url(asc.gif);
 }
 
+table.tablesorter thead tr .headerSortDown {
+    background-image: url(desc.gif);
+}
+
+table.tablesorter thead tr .headerSortDown,
+table.tablesorter thead tr .headerSortUp {
+    background-color: #eeeeee;
+}
+
+.editable-buttons {
+    display: block !important;
+}
+
+td input {
+    padding-right: 0px !important;
+}

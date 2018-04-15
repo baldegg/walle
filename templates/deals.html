@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block title %} Browse Items{% endblock %}
+{% block body %}
+
+<h2>Deals in your stores</h2>
+<form id="deals" action="/deals" method="get">
+     <!-- Switch -->
+  <div class="switch">
+    <label>
+      Items
+      <input type="checkbox" id="groupby" name="groupbystores">
+      <span class="lever"></span>
+      Stores
+    </label>
+  </div>
+  <br>
+   Minimum Discount (0-100%): <input type="text" id="discount" name="discount" value="75">
+  <button>Submit</button>
+</form>
+
+
+   {% for deal in deals %}
+    <div class="item ">
+        <img src="{{deal.thumbnailImage}}"/><br>
+        #<a href="/store?store={{deal.store}}">{{deal.store}}</a> - {{deal.city}}, {{deal.state}}<br>
+        {{deal.realname}}<br>
+        sku: <a href="/item?sku={{deal.sku}}">{{deal.sku}}</a> upc: {{deal.upc}}<br>
+        {{deal.qty}} in stock - ${{deal.price}}<br>
+        {{deal.discount}}% discount<br>
+        {{deal.datetime}}
+    </div>
+    {%endfor%}
+
+
+
+{% endblock %}

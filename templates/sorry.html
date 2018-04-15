@@ -3,5 +3,6 @@
 {% block body %}
 <h1>SORRY!</h1>
 <h2>{% if message %}{{message}}{% else %}Generic Error!{% endif %}</h2>
+{% if everythingUrl%}<h2>Try <a href='{{everythingUrl}}'>searching all inventory.</a></h2>{%endif%}
 
 {% endblock %}

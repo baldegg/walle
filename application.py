@@ -2,7 +2,8 @@ import os
 import sqlite3
 import json
 import config
-from flask import Flask, request, session, g, redirect, url_for, abort, jsonify, render_template, flash
+import csv
+from flask import Flask, request, session, g, redirect, url_for, abort, jsonify, render_template, flash, send_from_directory
 from flask_session import Session
 from werkzeug.exceptions import default_exceptions
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -132,7 +133,7 @@ def register():
     """Register user"""
     # clears session
     session.clear()
-    if request.method == "POST":
+    if request.method == "POST" and request.referrer.find(config.VARS['regKey']):
         db = get_db()
         # checks that all info has been entered and passwords match
         if not request.form.get("username"):
@@ -159,9 +160,10 @@ def register():
                 session["username"] = user['username']
                 flash(f"Registered as ({session['username']})!")
                 return redirect("/")
-    else:
+    elif request.args.get('regkey') == config.VARS['regKey']:
         # brings up registration form if no post data
         return render_template("register.html")
+    else: return render_template("sorry.html", message="Registration closed.")
 
 
 @app.route('/')
@@ -174,15 +176,39 @@ def index():
     return render_template("index.html", items=items, stores=stores)
 
 
-@app.route('/browseitems')
+@app.route('/browseitems', methods=['GET', 'POST'])
 @login_required
 def browseitems():
     """Shows entire database of items users have searched for, along with some interesting data"""
     db = get_db()
-    database = query_db('SELECT sku, itemData.name, thumbnailImage, categoryPath, numsearches, itemData.upc, SUM(qty) as count, MIN(price) as min, salePrice,\
+    level = query_db('SELECT level FROM users where uid=?',[session["user_id"]],one=True)['level']
+    if request.method=="GET":
+        page = request.args.get('page') or 1
+        page = int(page)
+        sortby = request.args.get('sortby') or 'numsearches'
+        category = request.args.get('category')
+        numitems = query_db('SELECT count(*) from itemData', one=True)
+        if category:
+            print(category)
+            numitems = query_db('SELECT count(*) from itemData WHERE categoryNode = ?',[category], one=True)
+            database = query_db('SELECT sku, itemData.name, thumbnailImage, categoryPath, categoryNode, numsearches, itemData.upc, SUM(qty) as count, MIN(price) as min, salePrice,\
+                    ROUND((100*(1 - MIN(price*1.0)/salePrice*1.0)),1) as bestDrop from itemData LEFT JOIN inventory on inventory.upc = itemData.upc\
+                    WHERE categoryNode = ? GROUP BY itemdata.upc ORDER BY numsearches DESC LIMIT ? OFFSET ?',[category, 100,(page-1)*100])
+        elif sortby == 'numsearches':
+            database = query_db('SELECT sku, itemData.name, thumbnailImage, categoryPath, categoryNode, numsearches, itemData.upc, SUM(qty) as count, MIN(price) as min, salePrice,\
+                                ROUND((100*(1 - MIN(price*1.0)/salePrice*1.0)),1) as bestDrop from itemData LEFT JOIN inventory on inventory.upc = itemData.upc\
+                                GROUP BY itemdata.upc ORDER BY numsearches DESC LIMIT ? OFFSET ?',[100,(page-1)*100])
+        elif sortby == 'bestdrop':
+            database = query_db('SELECT sku, itemData.name, thumbnailImage, categoryPath, categoryNode, numsearches, itemData.upc, SUM(qty) as count, MIN(price) as min, salePrice,\
                         ROUND((100*(1 - MIN(price*1.0)/salePrice*1.0)),1) as bestDrop from itemData LEFT JOIN inventory on inventory.upc = itemData.upc\
-                        GROUP BY inventory.upc ORDER BY datetime DESC')
-    return render_template("browseitems.html", database=database)
+                        GROUP BY itemdata.upc ORDER BY bestdrop DESC LIMIT ? OFFSET ?',[100,(page-1)*100])
+        return render_template("browseitems.html", database=database, page=page, numitems=numitems, sortby=sortby, level=level, category=category)
+    else:
+        query = request.form.get('itemsearch')
+        database = query_db("SELECT sku, itemData.name, thumbnailImage, categoryPath, categoryNode, numsearches, itemData.upc, SUM(qty) as count, MIN(price) as min, salePrice,\
+                    ROUND((100*(1 - MIN(price*1.0)/salePrice*1.0)),1) as bestDrop from itemData LEFT JOIN inventory on inventory.upc = itemData.upc\
+                    WHERE itemdata.name like '%'||?||'%' GROUP BY itemdata.upc LIMIT 100",[query])
+        return render_template("browseitems.html", database=database, query=query, level=level)
 
 
 @app.route('/browsestores', methods=['GET'])
@@ -217,11 +243,11 @@ def stores():
         db.execute('INSERT OR IGNORE INTO storesToSearch (id, uid) values (?, ?)', [store, session["user_id"]])
         db.commit()
         # allows user to delete stores from their personal list using checkboxes on index page
-    for key in request.form:
-        c = db.cursor()
-        if key != "z":
-            c.execute('DELETE FROM storesToSearch WHERE id=? AND uid=?', (key, session["user_id"]))
-    db.commit()
+    if len(request.form) > 1:
+        for key in request.form:
+            if key != "z" and key != "allStores":
+                db.execute('DELETE FROM storesToSearch WHERE id=? AND uid=?', (key, session["user_id"]))
+        db.commit()
     return redirect(url_for('index'))
 
 
@@ -230,7 +256,6 @@ def stores():
 def lookup():
     """Looks up items using Walmart Mobile API via lists on index page or adds them to user list via button on item page"""
     db = get_db()
-    c = db.cursor()
     skus = []
     # If coming from index page, converts walmart/brickseek links to skus and adds to array of skus
     if request.form.get("skus"):
@@ -258,7 +283,7 @@ def lookup():
     for key in request.form:
         # Allow user to delete items from their list using checkboxes on index page
         if key != "skus":
-            c.execute('DELETE FROM itemsToSearch WHERE sku=? AND uid=?', (key, session['user_id']))
+            db.execute('DELETE FROM itemsToSearch WHERE sku=? AND uid=?', (key, session['user_id']))
     db.commit()
     # sends user back to index page
     return redirect(url_for('index'))
@@ -295,6 +320,11 @@ def search():
             # adds each store inventory / price entry to inventory table
             for store in result['data']:
                 try:
+                    old_price = query_db('SELECT price FROM inventory WHERE store = ? and upc=?',[store['storeId'],result['origUpc']],one=True)
+                    if old_price:
+                        if store['packagePrice'] < old_price['price']:
+                            db.execute('INSERT INTO priceDrops (store_id, upc, old_price, new_price, qty, datetime)\
+                                        values (?, ?, ?, ?, ?, ?)', [int(store['storeId']), result['origUpc'], old_price['price'], store['packagePrice'], store['availabilityInStore'], str(datetime.now())])
                     db.execute('INSERT or REPLACE INTO inventory (upc, store, qty, price, name, datetime)\
                     values (?, ?, ?, ?, ?, ?)', [result['origUpc'], store['storeId'], store['availabilityInStore'], store['packagePrice'], store['name'], str(datetime.now())])
                 # passes up if no results
@@ -305,7 +335,7 @@ def search():
     db.commit()
     # collects newly acquired data to present to user as results page
     inv = query_db('SELECT inventory.upc as upc, itemData.sku, store, street, city, state, qty, price, datetime, msrp, thumbnailImage, itemData.name, salePrice FROM inventory \
-            INNER JOIN itemData ON itemData.upc = inventory.upc INNER JOIN stores ON inventory.store = stores.id INNER JOIN itemsToSearch on itemData.sku=itemstoSearch.sku WHERE qty > 0 AND uid = ? ORDER BY upc', [session["user_id"]])
+            INNER JOIN itemData ON itemData.upc = inventory.upc INNER JOIN stores ON inventory.store = stores.id INNER JOIN itemsToSearch on itemData.sku=itemstoSearch.sku INNER JOIN storesToSearch on stores.id = storesToSearch.id WHERE qty > 0 AND storesToSearch.uid = ? ORDER BY upc', [session["user_id"]])
     # if looking up a single sku from item page, redirect to the page we came from with updated data
     if request.args.get('sku'):
         return redirect(request.referrer)
@@ -317,7 +347,6 @@ def search():
 @app.route('/update', methods=['POST'])
 @login_required
 def update():
-    
     """Updates inventory data passed via jQuery"""
     # gets item and store from jquery request
     toUpdate = json.loads(request.data)
@@ -350,6 +379,7 @@ def item():
     sku = request.args.get("sku")
     everything = request.args.get("everything")
     db = get_db()
+    level = query_db('SELECT level FROM users where uid=?',[session["user_id"]],one=True)['level']
     # only displays items that are in stock and on user's list
     if not everything:
         inv = query_db('SELECT inventory.upc as upc, itemData.sku as sku, store, street, city, state, qty, price, datetime, msrp, salePrice, thumbnailImage, itemData.name FROM inventory \
@@ -358,11 +388,10 @@ def item():
     else:
         # displays inventory in all stores, even out of stock
         inv = query_db('SELECT inventory.upc as upc, itemData.sku as sku, store, street, city, state, qty, price, datetime, msrp, salePrice, thumbnailImage, itemData.name FROM inventory \
-                        INNER JOIN itemData ON itemData.upc = inventory.upc INNER JOIN stores ON inventory.store = stores.id INNER JOIN storesToSearch on inventory.store = storesToSearch.id  AND itemData.sku = ?  GROUP BY  store', [sku])
+                        INNER JOIN itemData ON itemData.upc = inventory.upc INNER JOIN stores ON inventory.store = stores.id  AND itemData.sku = ?  GROUP BY  store', [sku])
     if not inv:
-        return render_template("sorry.html", message="No inventory for this item at your stores.  Try adding '&everything=True' to url.")
-    else:
-        return render_template("item.html", inv=inv)
+        return render_template("sorry.html", everythingUrl = "/item?sku="+sku+"&everything=True", message = "No inventory for this item at your stores.")
+    return render_template("item.html", inv=inv, everything=everything, level=level)
 
 
 @app.route('/store', methods=['GET'])
@@ -378,6 +407,34 @@ def store():
         return render_template("sorry.html", message="No stock found at this store.")
     else:
         return render_template("store.html", inv=inv)
+
+@app.route('/deals', methods=['GET'])
+@login_required
+def deals():
+    db = get_db()
+    discount = request.args.get("discount") or 75.0
+    discount = float(discount)
+    groupbystores = request.args.get("groupbystores")
+    if groupbystores=="on":
+        deals = query_db('SELECT *, itemdata.name as realname, 100.0*(1.0-((1.0*inventory.price)/(1.0*itemdata.salePrice))) as discount from inventory INNER JOIN itemData on inventory.upc = itemData.upc INNER JOIN storestosearch ON inventory.store = storestosearch.id INNER JOIN stores on stores.id = storestosearch.id WHERE discount>? AND saleprice > 0 AND QTY > 0 ORDER BY stores.city',[discount])
+    else:
+        deals = query_db('SELECT *, itemdata.name as realname, 100.0*(1.0-((1.0*inventory.price)/(1.0*itemdata.salePrice))) as discount from inventory INNER JOIN itemData on inventory.upc = itemData.upc INNER JOIN storestosearch ON inventory.store = storestosearch.id INNER JOIN stores on stores.id = storestosearch.id WHERE discount>? AND saleprice > 0 AND QTY > 0 ORDER BY itemdata.name',[discount])
+    return render_template('deals.html', deals=deals)
+
+@app.route('/pricedrops', methods=['GET'])
+@login_required
+def pricedrops():
+    db = get_db()
+    yourdrops = []
+    upcs = query_db('SELECT DISTINCT upc from priceDrops ORDER BY datetime DESC LIMIT 100')
+    print(upcs)
+    for upc in upcs:
+        upc = upc['upc']
+        yourdrops.append(query_db('SELECT * from priceDrops inner join itemdata on pricedrops.upc = itemdata.upc inner join stores on pricedrops.store_id = stores.id where itemdata.upc = ? ORDER BY datetime DESC',[upc]))
+    print(yourdrops)
+    # for drop in yourdrops:
+    #     print(yourdrops[drop][0]['name'])
+    return render_template('pricedrops.html', upcs = upcs, yourdrops=yourdrops)
         
 @app.route('/admin', methods=['GET'])
 @login_required
@@ -386,16 +443,27 @@ def admin():
     db= get_db()
     level = query_db('SELECT level FROM users where uid=?',[session["user_id"]],one=True)['level']
     if level > 1:
-        users = query_db('SELECT * FROM users')
-        items = query_db('SELECT * from itemData')
-        return render_template("admin.html", users=users, items=items)
+        return render_template("admin.html")
+    else: 
+        return render_template("sorry.html", message="You're no administrator!")
+
+
+@app.route('/admin/items', methods=['GET'])
+@login_required
+def adminitems():
+    """Admin Item page"""
+    db= get_db()
+    level = query_db('SELECT level FROM users where uid=?',[session["user_id"]],one=True)['level']
+    if level > 1:
+        items = query_db('SELECT * from Itemdata')
+        return render_template("adminitems.html", items=items)
     else: 
         return render_template("sorry.html", message="You're no administrator!")
 
 @app.route('/admin/users', methods=['GET', 'POST'])
 @login_required
 def users():
-    """Admin page"""
+    """Admin User page"""
     db= get_db()
     level = query_db('SELECT level FROM users where uid=?',[session["user_id"]],one=True)['level']
     #if an admin is logged in
@@ -446,24 +514,80 @@ def users():
     else: 
         return render_template("sorry.html", message="You're no administrator!")
 
+@app.route('/adminedit', methods=['POST'])
+@login_required
+def adminedit():
+    db= get_db()
+    level = query_db('SELECT level FROM users where uid=?',[session["user_id"]],one=True)['level']
+    if level > 1:
+        key = request.form.get('name')
+        sku = request.form.get('pk')
+        value = float(request.form.get('value'))
+        if key=="salePrice":
+            db.execute('UPDATE itemData SET salePrice = ? WHERE sku = ?', [value, sku])
+            db.commit()
+            return "DB UPDATED!"
+    else:
+        return "YOU NO ADMIN"
 
-# @app.route('/delete', methods=['POST'])
-# @login_required
-# def delete():
-#     """Allows user to delete items from main DB.  Not Currently in use."""
-#     db = get_db()
-#     c = db.cursor()
-#     for key in request.form:
-#         print(key)
-#         upc = query_db('SELECT upc FROM itemData WHERE sku=?',(key,))[0]['upc']
-        # c.execute('DELETE FROM itemData WHERE sku=?',(key,))
-        # c.execute('DELETE FROM itemsToSearch WHERE sku=?',(key,))
-#         if upc:
-#             c.execute('DELETE FROM inventory WHERE upc=?',(upc,))
-#     db.commit()
-#     return redirect(url_for('index'))
+@app.route('/delete', methods=['POST'])
+@login_required
+def delete():
+    """Allows admin to delete items from main DB."""
+    db = get_db()
+    level = query_db('SELECT level FROM users where uid=?',[session["user_id"]],one=True)['level']
+    if level > 1:
+        sku = json.loads(request.data);
+        upc = query_db('SELECT upc FROM itemData WHERE sku=?',[sku])[0]['upc']
+        db.execute('DELETE FROM itemData WHERE sku=?',[sku])
+        db.execute('DELETE FROM itemsToSearch WHERE sku=?',[sku])
+        if upc:
+                db.execute('DELETE FROM inventory WHERE upc=?',(upc,))
+                db.execute('DELETE FROM priceDrops WHERE upc=?',(upc,))
+        db.commit()
+        return "ITEM DELETED!"
 
-# if __name__ == "__main__":
-#     app.run(host = '0.0.0.0', port=8080)
+@app.route('/reports')
+@login_required
+def reports():
+    """Generate reports on various data"""
+    db = get_db()
+    level = query_db('SELECT level FROM users where uid=?',[session["user_id"]],one=True)['level']
+    report =  request.args.get('report')
+    if level > 1:
+        if report:
+                if report=="itemdata":
+                    with open('reports/itemdata.csv', 'w') as f:
+                        writer = csv.writer(f)
+                        headers = query_db("PRAGMA table_info(itemdata)")
+                        rows = query_db('select * FROM itemdata')
+                        writer.writerow([header[1] for header in headers])
+                        for row in rows:
+                            writer.writerow([item for item in row])
+                    return send_from_directory('reports', 'itemdata.csv', as_attachment=True)
+                elif report=="inventory":
+                    with open('reports/inventory.csv', 'w') as f:
+                        writer = csv.writer(f)
+                        headers = query_db("PRAGMA table_info(inventory)")
+                        rows = query_db('select * FROM inventory')
+                        writer.writerow([header[1] for header in headers])
+                        for row in rows:
+                            writer.writerow([item for item in row])
+                    return send_from_directory('reports', 'inventory.csv', as_attachment=True)
+                elif report=="pricedrops":
+                    with open('reports/pricedrops.csv', 'w') as f:
+                        writer = csv.writer(f)
+                        headers = query_db("PRAGMA table_info(pricedrops)")
+                        rows = query_db('select * FROM pricedrops')
+                        writer.writerow([header[1] for header in headers])
+                        for row in rows:
+                            writer.writerow([item for item in row])
+                    return send_from_directory('reports', 'pricedrops.csv', as_attachment=True)        
+        else:
+            return render_template("reports.html")
+    else:
+        return render_template("sorry.html", message="Reports for admins only.")
+        
 
-app.run(host = '0.0.0.0', port=8080, debug=True)
+if __name__ == "__main__":
+    app.run(host = '0.0.0.0')
