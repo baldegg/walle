@@ -18,10 +18,11 @@
 <div class="items">
     {% for deal in deals %}
 
-    <div class="item" style="background:rgba({{255-deal.discount/100*255}},{{deal.discount/100*255}},0,.5)">
+    <div class="item {{deal.sku}}" style="background:rgba({{255-deal.discount/100*255}},{{deal.discount/100*255}},0,.5)">
         <img src="{{deal.thumbnailImage}}" /><br> #
         <a href="/store?store={{deal.store}}">{{deal.store}}</a> - {{deal.city}}, {{deal.state}}<br> {{deal.realname}}
         <br> sku: <a href="/item?sku={{deal.sku}}">{{deal.sku}}</a> upc: {{deal.upc}}<br> {{deal.qty}} in stock - ${{deal.price}}<br> {{deal.discount}}% discount<br> {{deal.datetime}}<br>
+        <a href="#" onclick="addToShoppingList({{deal.upc}},{{deal.store}});return false"><i class="material-icons">list</i></a>
         <a href="#" onclick="$('.{{deal.sku}}').hide();return false"><i class="material-icons">remove_red_eye</i></a>
     </div>
 

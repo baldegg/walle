@@ -21,7 +21,7 @@ sku: {{inv[0].sku}} | UPC: <a href="http://barcode.live/?upc={{inv[0].upc}}" id=
     <table id="iteminv" class="tablesorter">
         <thead>
             <tr>
-   
+                   <th><i class="material-icons">list</i></th>
                 <th>update</th>
                 <th>store</th>
                 <th>city</th>
@@ -30,13 +30,13 @@ sku: {{inv[0].sku}} | UPC: <a href="http://barcode.live/?upc={{inv[0].upc}}" id=
                 <th>stock</th>
                 <th>price</th>
                 <th>updated</th>
-                <th><i class="material-icons">list</i></th>
+
             </tr>
         </thead>
         <tbody>
             {% for item in inv %}
             <tr>
-               
+                               <td><a href="#" onclick="addToShoppingList({{item.upc}},{{item.store}})"><i class="material-icons">list</i></a></td>
                 <td><a href="#" onclick="updateInv({{item.store}}); return false;"><i class ="refresh material-icons">autorenew</i></a></td>
                 <td><a href="/store?store={{item.store}}">{{item.store}}</a></td>
                 <td>{{item.city}}</td>
@@ -45,7 +45,7 @@ sku: {{inv[0].sku}} | UPC: <a href="http://barcode.live/?upc={{inv[0].upc}}" id=
                 <td id ="qty">{{item.qty}}</td>
                 <td id="price">${{item.price}}</td>
                 <td id="timestamp">{{item.datetime}}</td>
-                <td><a href="#" onclick="addToShoppingList({{item.upc}},{{item.store}})"><i class="material-icons">list</i></a></td>
+
             </tr>
             {%endfor%}
         </tbody>

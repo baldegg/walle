@@ -603,9 +603,13 @@ def shoppinglist():
             db.execute('INSERT OR IGNORE INTO shoppinglist (uid, upc, store) VALUES(?, ?, ?)',[session["user_id"],request.form.get("upc"),request.form.get("store")])
             db.commit()
             return "0"
-    
+
+@app.route('/help', methods=['GET'])
+@login_required
+def help():
+    return render_template("help.html")
 
 if __name__ == "__main__":
     app.run(host = '0.0.0.0', port=8080)
 
-app.run(host = '0.0.0.0', port=8080, debug=True)
+# app.run(host = '0.0.0.0', port=8080, debug=True)
