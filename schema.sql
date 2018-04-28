@@ -69,3 +69,11 @@ create table users (
   email text
   level integer not null
 );
+
+create table shoppinglist(
+
+uid integer not null,
+store integer not null,
+upc numeric not null,
+PRIMARY KEY (upc, store, uid)
+);

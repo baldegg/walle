@@ -16,7 +16,6 @@ from flask_debugtoolbar import DebugToolbarExtension
 # create the application instance :)
 app = Flask(__name__)
 app.config.from_object(__name__)
-
 SECRET_KEY = config.VARS['SECRET_KEY']
 
 # Load default config and override config from an environment variable
@@ -29,27 +28,17 @@ app.config.update(dict(
 app.debug = False
 toolbar = DebugToolbarExtension(app)
 
-# cache settings - disabled for now to increase speed
-# @app.after_request
-# def after_request(response):
-#     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-#     response.headers["Expires"] = 0
-#     response.headers["Pragma"] = "no-cache"
-#     return response
-
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_FILE_DIR"] = './session'
 app.config["SESSION_PERMANENT"] = True
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-
 def connect_db():
     """Connects to the specific database."""
     rv = sqlite3.connect(app.config['DATABASE'])
     rv.row_factory = sqlite3.Row
     return rv
-
 
 def init_db():
     """Initializes DB according to schema.sql"""
@@ -58,13 +47,11 @@ def init_db():
         db.cursor().executescript(f.read())
     db.commit()
 
-
 @app.cli.command('initdb')
 def initdb_command():
     """Initializes the database from command line"""
     init_db()
     print('Initialized the database.')
-
 
 def query_db(query, args=(), one=False):
     """Helper function to query DB"""
@@ -147,7 +134,7 @@ def register():
             pw_hash = generate_password_hash(request.form.get("password"))
             # inserts new user along with password hash into users table
             try:
-                result = db.execute("INSERT INTO users (username, hash) VALUES(?, ?)",
+                db.execute("INSERT INTO users (username, hash) VALUES(?, ?)",
                                     [request.form.get("username"), pw_hash])
             except sqlite3.IntegrityError:
                 # if user already exists, db query will return None
@@ -172,7 +159,9 @@ def index():
     """Shows personalized list of items to search for and stores in which to search"""
     db = get_db()
     items = query_db('SELECT sku, name from itemsToSearch WHERE uid=?', [session["user_id"]])
-    stores = query_db('SELECT storesToSearch.id as id, city, state, street FROM storesToSearch INNER JOIN stores on stores.id = storesToSearch.id WHERE storesToSearch.uid=?', [session['user_id']])
+    stores = query_db('SELECT storesToSearch.id as id, city, state, street FROM storesToSearch\
+                       INNER JOIN stores on stores.id = storesToSearch.id WHERE storesToSearch.uid=?'\
+                        , [session['user_id']])
     return render_template("index.html", items=items, stores=stores)
 
 
@@ -192,7 +181,7 @@ def browseitems():
             print(category)
             numitems = query_db('SELECT count(*) from itemData WHERE categoryNode = ?',[category], one=True)
             database = query_db('SELECT sku, itemData.name, thumbnailImage, categoryPath, categoryNode, numsearches, itemData.upc, SUM(qty) as count, MIN(price) as min, salePrice,\
-                    ROUND((100*(1 - MIN(price*1.0)/salePrice*1.0)),1) as bestDrop from itemData LEFT JOIN inventory on inventory.upc = itemData.upc\
+                   B ROUND((100*(1 - MIN(price*1.0)/salePrice*1.0)),1) as bestDrop from itemData LEFT JOIN inventory on inventory.upc = itemData.upc\
                     WHERE categoryNode = ? GROUP BY itemdata.upc ORDER BY numsearches DESC LIMIT ? OFFSET ?',[category, 100,(page-1)*100])
         elif sortby == 'numsearches':
             database = query_db('SELECT sku, itemData.name, thumbnailImage, categoryPath, categoryNode, numsearches, itemData.upc, SUM(qty) as count, MIN(price) as min, salePrice,\
@@ -334,7 +323,7 @@ def search():
             pass
     db.commit()
     # collects newly acquired data to present to user as results page
-    inv = query_db('SELECT inventory.upc as upc, itemData.sku, store, street, city, state, qty, price, datetime, msrp, thumbnailImage, itemData.name, salePrice FROM inventory \
+    inv = query_db('SELECT inventory.upc as upc, itemData.sku, store, street, city, state, qty, price, datetime, msrp, thumbnailImage, itemData.name, salePrice, ROUND(100.0*(1.0-((1.0*inventory.price)/(1.0*itemdata.salePrice))),2) as discount FROM inventory \
             INNER JOIN itemData ON itemData.upc = inventory.upc INNER JOIN stores ON inventory.store = stores.id INNER JOIN itemsToSearch on itemData.sku=itemstoSearch.sku INNER JOIN storesToSearch on stores.id = storesToSearch.id WHERE qty > 0 AND storesToSearch.uid = ? ORDER BY upc', [session["user_id"]])
     # if looking up a single sku from item page, redirect to the page we came from with updated data
     if request.args.get('sku'):
@@ -352,6 +341,7 @@ def update():
     toUpdate = json.loads(request.data)
     print(toUpdate)
     # looks up item
+
     result = invLookup(toUpdate['upc'],toUpdate['store'])['data'][0]
     db = get_db()
     # updates inventory database with new info
@@ -359,7 +349,9 @@ def update():
         db.execute('INSERT or REPLACE INTO inventory (upc, store, qty, price, name, datetime)\
         values (?, ?, ?, ?, ?, ?)', [toUpdate['upc'], toUpdate['store'], result['availabilityInStore'], result['packagePrice'], result['name'], str(datetime.now())])
     except KeyError:
-        return -1
+        db.execute('DELETE FROM inventory WHERE upc=? AND store =?',[toUpdate['upc'],toUpdate['store']])
+        db.commit()
+        return "Deleted"
     db.commit()
     # packages updated data
     updated = {
@@ -415,10 +407,14 @@ def deals():
     discount = request.args.get("discount") or 75.0
     discount = float(discount)
     groupbystores = request.args.get("groupbystores")
+    q = 'SELECT *, itemdata.name as realname, ROUND(100.0*(1.0-((1.0*inventory.price)/(1.0*itemdata.salePrice))),2) as discount\
+    from inventory INNER JOIN itemData on inventory.upc = itemData.upc INNER JOIN storestosearch ON inventory.store = storestosearch.id\
+    INNER JOIN stores on stores.id = storestosearch.id WHERE discount>? AND saleprice > 0 AND QTY > 0 AND uid=?'
     if groupbystores=="on":
-        deals = query_db('SELECT *, itemdata.name as realname, 100.0*(1.0-((1.0*inventory.price)/(1.0*itemdata.salePrice))) as discount from inventory INNER JOIN itemData on inventory.upc = itemData.upc INNER JOIN storestosearch ON inventory.store = storestosearch.id INNER JOIN stores on stores.id = storestosearch.id WHERE discount>? AND saleprice > 0 AND QTY > 0 ORDER BY stores.city',[discount])
-    else:
-        deals = query_db('SELECT *, itemdata.name as realname, 100.0*(1.0-((1.0*inventory.price)/(1.0*itemdata.salePrice))) as discount from inventory INNER JOIN itemData on inventory.upc = itemData.upc INNER JOIN storestosearch ON inventory.store = storestosearch.id INNER JOIN stores on stores.id = storestosearch.id WHERE discount>? AND saleprice > 0 AND QTY > 0 ORDER BY itemdata.name',[discount])
+         q += " ORDER BY stores.city"
+    else: 
+         q += " ORDER BY itemData.sku"
+    deals = query_db(q,[discount,session["user_id"]])
     return render_template('deals.html', deals=deals)
 
 @app.route('/pricedrops', methods=['GET'])
@@ -432,8 +428,6 @@ def pricedrops():
         upc = upc['upc']
         yourdrops.append(query_db('SELECT * from priceDrops inner join itemdata on pricedrops.upc = itemdata.upc inner join stores on pricedrops.store_id = stores.id where itemdata.upc = ? ORDER BY datetime DESC',[upc]))
     print(yourdrops)
-    # for drop in yourdrops:
-    #     print(yourdrops[drop][0]['name'])
     return render_template('pricedrops.html', upcs = upcs, yourdrops=yourdrops)
         
 @app.route('/admin', methods=['GET'])
@@ -587,7 +581,31 @@ def reports():
             return render_template("reports.html")
     else:
         return render_template("sorry.html", message="Reports for admins only.")
-        
+
+@app.route('/shoppinglist', methods=['GET', 'POST'])
+@login_required
+def shoppinglist():
+    db = get_db()
+    if request.method=="GET":
+        yourlist = query_db('SELECT * from shoppingList\
+                    INNER JOIN inventory on shoppinglist.upc=inventory.upc and shoppinglist.store=inventory.store\
+                    INNER JOIN itemdata on itemdata.upc=shoppinglist.upc\
+                    INNER JOIN stores on stores.id=shoppinglist.store\
+                    WHERE uid=?',[session["user_id"]])
+        return render_template('shoppinglist.html',yourlist=yourlist)
+    elif request.method=="POST":
+        if request.form.get("delete"):
+            db.execute("DELETE FROM shoppinglist WHERE uid=? and upc=? and store=?",[session["user_id"],request.form.get("upc"),request.form.get("store")])
+            print("DELETE!!")
+            db.commit()
+            return "1"
+        else:
+            db.execute('INSERT OR IGNORE INTO shoppinglist (uid, upc, store) VALUES(?, ?, ?)',[session["user_id"],request.form.get("upc"),request.form.get("store")])
+            db.commit()
+            return "0"
+    
 
 if __name__ == "__main__":
-    app.run(host = '0.0.0.0')
+    app.run(host = '0.0.0.0', port=8080)
+
+app.run(host = '0.0.0.0', port=8080, debug=True)

@@ -1,35 +1,72 @@
-{% extends "layout.html" %}
-{% block title %} Browse Items{% endblock %}
-{% block body %}
+{% extends "layout.html" %} {% block title %} Browse Items{% endblock %} {% block body %}
 
 <h2>Deals in your stores</h2>
 <form id="deals" action="/deals" method="get">
-     <!-- Switch -->
-  <div class="switch">
-    <label>
+    <div class="switch">
+        <label>
       Items
       <input type="checkbox" id="groupby" name="groupbystores">
       <span class="lever"></span>
       Stores
     </label>
-  </div>
-  <br>
-   Minimum Discount (0-100%): <input type="text" id="discount" name="discount" value="75">
-  <button>Submit</button>
+    </div>
+    <br> Minimum Discount (0-100%): <input type="text" id="discount" name="discount" value="75">
+    <button>Submit</button>
 </form>
 
+<a href="#" id="showTables" onclick="showTables()">Show Table</a> | <a href="#" id="showItems" onclick="showItems()">Show Items</a>
+<div class="items">
+    {% for deal in deals %}
 
-   {% for deal in deals %}
-    <div class="item ">
-        <img src="{{deal.thumbnailImage}}"/><br>
-        #<a href="/store?store={{deal.store}}">{{deal.store}}</a> - {{deal.city}}, {{deal.state}}<br>
-        {{deal.realname}}<br>
-        sku: <a href="/item?sku={{deal.sku}}">{{deal.sku}}</a> upc: {{deal.upc}}<br>
-        {{deal.qty}} in stock - ${{deal.price}}<br>
-        {{deal.discount}}% discount<br>
-        {{deal.datetime}}
+    <div class="item" style="background:rgba({{255-deal.discount/100*255}},{{deal.discount/100*255}},0,.5)">
+        <img src="{{deal.thumbnailImage}}" /><br> #
+        <a href="/store?store={{deal.store}}">{{deal.store}}</a> - {{deal.city}}, {{deal.state}}<br> {{deal.realname}}
+        <br> sku: <a href="/item?sku={{deal.sku}}">{{deal.sku}}</a> upc: {{deal.upc}}<br> {{deal.qty}} in stock - ${{deal.price}}<br> {{deal.discount}}% discount<br> {{deal.datetime}}<br>
+        <a href="#" onclick="$('.{{deal.sku}}').hide();return false"><i class="material-icons">remove_red_eye</i></a>
     </div>
+
     {%endfor%}
+</div>
+<div class="tables">
+    <table class="tablesorter striped" id="dealItems">
+
+        <thead>
+            <tr>
+                <th>add to list</th>
+                <th>hide</th>
+                <th>thumbnail</th>
+                <th>name</th>
+                <th>sku</th>
+                <th>store</th>
+                <th>city</th>
+                <th>state</th>
+                <th>price</th>
+                <th>discount</th>
+                <th>quantity</th>
+                <th>last search</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for deal in deals %}
+            <tr class="{{deal.sku}}">
+                <td><a href="#" onclick="addToShoppingList({{deal.upc}},{{deal.store}})"><i class="material-icons">list</i></a></td>
+                <td><a href="#" onclick="$('.{{deal.sku}}').hide();return false"><i class="material-icons">remove_red_eye</i></a></td>
+                <td><img src="{{deal.thumbnailImage}}" class="tablethumb" \></td>
+                <td><a href="/item?sku={{deal.sku}}">{{deal.sku}}</a></td>
+                <td>{{deal.realname}}</td>
+                <td>{{deal.store}}</td>
+                <td>{{deal.city}}</td>
+                <td>{{deal.state}}</td>
+                <td>{{deal.price}}</td>
+                <td style="background:rgba({{255-deal.discount/100*255}},{{deal.discount/100*255}},0,1)">{{deal.discount}}</td>
+                <td{% if deal.qty==1 %} class="limited" {% else %} class="instock" {% endif %}><b>{{deal.qty}}</b></td>
+                    <td>{{deal.datetime}}</td>
+            </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
+</div>
 
 
 

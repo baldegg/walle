@@ -1,14 +1,10 @@
 /* global $*/
 
-
-
 $(document).ready(function() {
-  $("#allitems").tablesorter();
-  $("#allstores").tablesorter();
-  $("#iteminv").tablesorter();
-  $("#storestock").tablesorter();
-  $("#users").tablesorter();
-  $("#adminitems").tablesorter();
+  //make tables sortable
+  $('.tablesorter').tablesorter();
+
+  //enables check/uncheck all boxes 
   $('.masterCheck').click(function() {
     $(this).closest('table').find('.slaveCheck').each(function() {
       $(this).click();
@@ -17,22 +13,7 @@ $(document).ready(function() {
 
 });
 
-
-  var slider = document.getElementById('test-slider');
-  noUiSlider.create(slider, {
-   start: [20, 80],
-   connect: true,
-   step: 1,
-   orientation: 'horizontal', // 'horizontal' or 'vertical'
-   range: {
-     'min': 0,
-     'max': 100
-   },
-   format: wNumb({
-     decimals: 0
-   })
-  });
-  
+//show loading bar
 function loading() {
   console.log("loading");
   $(".progress").show();
@@ -51,14 +32,36 @@ function updateInv() {
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       var updated = JSON.parse(this.responseText);
-      $(document.activeElement).parent().parent().children()[5].innerText = updated['qty'];
-      $(document.activeElement).parent().parent().children()[6].innerText = "$" + updated['price'];
-      $(document.activeElement).parent().parent().children()[7].innerText = updated['timestamp'];
+            $(document.activeElement)[0].innerHTML = "<i class='refresh material-icons'>sync_problem</i>"
+      $(document.activeElement).parent().siblings("#qty")[0].innerText = updated['qty'];
+      $(document.activeElement).parent().siblings('#price')[0].innerText = "$" + updated['price'];
+      $(document.activeElement).parent().siblings("#timestamp")[0].innerText = updated['timestamp'];
     }
   };
   xhttp.open("POST", "/update", true);
   xhttp.send(JSON.stringify(data));
 }
+
+function updateShoppingListInv(upc, store) {
+  var data = {
+    "store": store,
+    "upc": upc
+  }
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      var updated = JSON.parse(this.responseText);
+      
+      $(document.activeElement).siblings("#qty")[0].innerText = updated['qty'];
+      $(document.activeElement).siblings("#price")[0].innerText = "$" + updated['price'];
+      $(document.activeElement).siblings("#timestamp")[0].innerText = updated['timestamp'];
+    }
+  };
+  xhttp.open("POST", "/update", true);
+  xhttp.send(JSON.stringify(data));
+}
+
+
 
 function updateStore() {
   var upc = $(document.activeElement).parent().parent().children()[4].innerText;
@@ -95,7 +98,7 @@ function addItem() {
 }
 
 function addStore() {
-  var store = $(document.activeElement)[0]['id'].replace('.add', ''); 
+  var store = $(document.activeElement)[0]['id'].replace('.add', '');
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
@@ -106,15 +109,42 @@ function addStore() {
   xhttp.send(store);
 }
 
+function addToShoppingList(upc, store) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      $(document.activeElement)[0].innerHTML = "<i class='material-icons'>playlist_add_check</i>"
+
+    }
+  };
+  xhttp.open("POST", "/shoppinglist", true);
+  xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  xhttp.send("upc=" + upc + "&store=" + store);
+}
+
+function deleteFromShoppingList(upc, store) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      $(document.activeElement).closest('div').css("display", "none");
+    }
+  };
+  xhttp.open("POST", "/shoppinglist", true);
+  xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  xhttp.send("upc=" + upc + "&store=" + store + "&delete=true");
+}
+
+
 function loadStores() {
   loading();
   var sku = $(document.activeElement)[0]['id'].replace('.add', '');
 }
 
 
-function confirmDelete(){
+function confirmDelete() {
   $(document.activeElement).next('button').toggle();
 }
+
 function showEdit() {
   $(".edit").show();
 }
@@ -124,9 +154,19 @@ function adminDelete(sku) {
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       $(document.activeElement).text("DELETED!");
-      $(document.activeElement).closest('tr').css("display","none");
+      $(document.activeElement).closest('tr').css("display", "none");
     }
   };
   xhttp.open("POST", "/delete");
   xhttp.send(sku);
+}
+
+function showItems() {
+  $('.tables').hide()
+  $('.items').show()
+}
+
+function showTables() {
+  $('.items').hide()
+  $('.tables').show()
 }

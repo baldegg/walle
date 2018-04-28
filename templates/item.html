@@ -1,40 +1,55 @@
-{% extends "layout.html" %}
-{% block body %}
+{% extends "layout.html" %} {% block body %}
 
-<img src="{{inv[0].thumbnailImage}}"/><br>
+<img src="{{inv[0].thumbnailImage}}" /><br>
 <h4>{{inv[0].name}}</h4>
-sku: {{inv[0].sku}} | UPC: <a href="http://barcode.live/?upc={{inv[0].upc}}" id="upc">{{inv[0].upc}}</a> <br>
-MSRP: {{inv[0].MSRP}} | Sale Price: {{inv[0].salePrice}}<br>
-<a href="http://www.walmart.com/ip/{{inv[0].sku}}">Walmart</a> | <a href="https://brickseek.com/walmart-inventory-checker?sku={{inv[0].sku}}">Brickseek</a> | <a href="https://www.ebay.com/sch/i.html?LH_Complete=1&LH_Sold=1&_nkw={{inv[0].upc}}&rt=nc&LH_ItemCondition=3">eBay Solds</a><br>
-{%if everything%}
-Showing all inventory. <br>
-<a href="/item?sku={{inv[0].sku}}">Click here to show only your stores!</a>
-{%else%}
-Note: Only in stock inventory in your stores is shown. <br>
-<a href="/item?sku={{inv[0].sku}}&everything=True">Click here to show all inventory!</a>
-{%endif%}
-
-{% if level > 1 %}
+sku: {{inv[0].sku}} | UPC: <a href="http://barcode.live/?upc={{inv[0].upc}}" id="upc">{{inv[0].upc}}</a> <br> MSRP: {{inv[0].MSRP}} | Sale Price: {{inv[0].salePrice}}<br>
+<a href="http://www.walmart.com/ip/{{inv[0].sku}}">Walmart</a> | <a href="https://brickseek.com/walmart-inventory-checker?sku={{inv[0].sku}}">Brickseek</a> | <a href="https://www.ebay.com/sch/i.html?LH_Complete=1&LH_Sold=1&_nkw={{inv[0].upc}}&rt=nc&LH_ItemCondition=3">eBay Solds</a><br>{%if everything%} Showing all inventory. <br>
+<a href="/item?sku={{inv[0].sku}}">Click here to show only your stores!</a> {%else%} Note: Only in stock inventory in your stores is shown. <br>
+<a href="/item?sku={{inv[0].sku}}&everything=True">Click here to show all inventory!</a> {%endif%} {% if level > 1 %}
 <br>
 <td><button onclick="confirmDelete()" type="button">Delete</button>
-<button class="confirm" onclick="adminDelete({{inv[0].sku}})">Confirm</button></td>
+    <button class="confirm" onclick="adminDelete({{inv[0].sku}})">Confirm</button></td>
 {%endif%}
 
 <form id="updateMyStores" action="/search?sku={{inv[0].sku}}" method="post">
-<center><button class="waves-effect waves-light  amber darken-2 btn" type="submit" onclick="loadStores();">Update Stock in All My Stores!</button></center><br>
+    <center><button class="waves-effect waves-light  amber darken-2 btn" type="submit" onclick="loadStores();">Update Stock in All My Stores!</button></center><br>
 </form>
 <div class="progress">
     <div class="indeterminate"></div>
 </div>
 <div class="content">
-<table id ="iteminv" class="tablesorter">
- <thead><tr><th>update</th><th>store</th><th>city</th><th>state</th><th>address</th><th>stock</th><th>price</th><th>updated</th></tr></thead>
-<tbody>
-    {% for item in inv %}
-        <tr><td><button class="waves-effect waves-light amber darken-2 btn-small" onclick="updateInv()">UPDATE</button></td><td><a href="/store?store={{item.store}}">{{item.store}}</a></td><td>{{item.city}}</td><td>{{item.state}}</td><td>{{item.street}}</td><td>{{item.qty}}</td><td>${{item.price}}</td><td>{{item.datetime}}</td></tr>
-    {%endfor%}
-</tbody>
-</table>
+    <table id="iteminv" class="tablesorter">
+        <thead>
+            <tr>
+   
+                <th>update</th>
+                <th>store</th>
+                <th>city</th>
+                <th>state</th>
+                <th>address</th>
+                <th>stock</th>
+                <th>price</th>
+                <th>updated</th>
+                <th><i class="material-icons">list</i></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in inv %}
+            <tr>
+               
+                <td><a href="#" onclick="updateInv({{item.store}}); return false;"><i class ="refresh material-icons">autorenew</i></a></td>
+                <td><a href="/store?store={{item.store}}">{{item.store}}</a></td>
+                <td>{{item.city}}</td>
+                <td>{{item.state}}</td>
+                <td>{{item.street}}</td>
+                <td id ="qty">{{item.qty}}</td>
+                <td id="price">${{item.price}}</td>
+                <td id="timestamp">{{item.datetime}}</td>
+                <td><a href="#" onclick="addToShoppingList({{item.upc}},{{item.store}})"><i class="material-icons">list</i></a></td>
+            </tr>
+            {%endfor%}
+        </tbody>
+    </table>
 </div>
 
 

@@ -3,7 +3,6 @@
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 
 
-
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='materialize/css/materialize.min.css') }}" media="screen,projection" />
@@ -23,24 +22,28 @@
     <div class=page>
         <nav>
             <div class="nav-wrapper">
+                {% if session.username %}
                 <ul id="nav-mobile" class="left hide-on-med-and-down">
                     <li><a href="/">Home</a></li>
                     <li><a href="/browseitems">Browse Items</a></li>
                     <li><a href="/browsestores">Browse Stores</a></li>
                     <li><a href="/deals">Deals</a></li>
                     <li><a href="/pricedrops">Drops</a></li>
-                    <!--<li><a href="#">Test1</a></li>-->
-                    <!--        <li><a href="#">Test1</a></li>-->
+                    <li><a href="/shoppinglist">Shopping List</a></li>
                 </ul>
 
-
+                {% endif %}
                 <ul id="nav-mobile" class="right hide-on-med-and-down">
                     <li> {% if session.username %} Logged in as: {{session.username}} {% endif %}
                     </li>
                     <li><a href="{{url_for('login')}}">      {% if not session.username %}Login <li><a href="{{url_for('register')}}">Register</a></li>
-                    {%else%}Logout{%endif%}</a></li>
-                    {% if session.level == 2 %}<li><a href="{{url_for('admin')}}">Admin</a></li>{%endif%}
-                   
+                    {%else%}Logout{%endif%}</a>
+                    </li>
+                    {% if session.level == 2 %}
+                    <li><a href="{{url_for('admin')}}">Admin</a></li>
+                    <li><a href="{{url_for('reports')}}">Reports</a></li>
+                    {%endif%}
+
                 </ul>
             </div>
         </nav>
@@ -49,14 +52,13 @@
         {% endfor %}
         <div class="container">
             <center>
-            <a href="/">
+                <a href="/">
                     <h1 class="w">WALLE</h1>
                     <h1>*</h1>
                     <h1 class="m">WORLD</h1>
-            </a>
+                </a>
             </center>
-            <br>
-            {% block body %} {% endblock %}
+            <br> {% block body %} {% endblock %}
 
 
         </div>

@@ -1,20 +1,29 @@
-{% extends "layout.html" %}
-{% block body %}
+{% extends "layout.html" %} {% block body %}
 
 <h2>All Stores</h2>
-Click headers to sort
 <table class="striped tablesorter" id="allstores">
     <thead>
-  <tr><th>add</th><th>id</th><th>address</th><th>city</th><th>state</th><th>zip</th></tr>
-  </thead>
-<tbody>
-{%for store in stores%}
-<tr>
-<td><button class="waves-effect waves-light amber darken-2 btn-small" id="{{store.id}}.add" onclick="addStore()">ADD</button></td>
-<td><a href="/store?store={{store.id}}">{{store.id}}</a></td> <td>{{store.street}}</td><td>{{store.city}}</td><td>{{store.state}}</td><td>{{store.zip}}</td>
-</tr>
-{%endfor%}
-</tbody>
+        <tr>
+            <th>add</th>
+            <th>id</th>
+            <th>address</th>
+            <th>city</th>
+            <th>state</th>
+            <th>zip</th>
+        </tr>
+    </thead>
+    <tbody>
+        {%for store in stores%}
+        <tr>
+            <td><button class="waves-effect waves-light amber darken-2 btn-small" id="{{store.id}}.add" onclick="addStore()">ADD</button></td>
+            <td><a href="/store?store={{store.id}}">{{store.id}}</a></td>
+            <td>{{store.street}}</td>
+            <td>{{store.city}}</td>
+            <td>{{store.state}}</td>
+            <td>{{store.zip}}</td>
+        </tr>
+        {%endfor%}
+    </tbody>
 </table>
 
 <div id="updates"></div>
