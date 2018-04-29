@@ -8,9 +8,17 @@
     <img src="{{item.thumbnailImage}}" /><br> #
     <a href="/store?store={{item.store}}">{{item.store}}</a> - {{item.city}}<br> {{item.name}}
     <br> sku: <a href="/item?sku={{item.sku}}">{{item.sku}}</a> upc: {{item.upc}}<br>
-    <span id="qty">{{item.qty}}</span> in stock - <span id="price">${{item.price}}</span><br> {{item.discount}}% discount<br>
+    <span id="qty">{{item.qty}}</span> in stock - <span id="price">${{item.price}}</span><br>
     <span id="timestamp">{{item.datetime}}</span><br>
     <a href="#" onclick="updateShoppingListInv({{item.upc}},{{item.store}}); return false;"><i class ="refresh material-icons">autorenew</i></a>
-    <a href="#" onclick="deleteFromShoppingList({{item.upc}},{{item.store}}); return false;" ><i class =" delete material-icons">delete_forever</i></button>
+    <a href="#" onclick="deleteFromShoppingList({{item.upc}},{{item.store}}); return false;" ><i class =" delete material-icons">delete_forever</i></button></a>
   </div>
-  {% endfor%} {% endblock %}
+
+
+  
+
+    {% endfor%} 
+
+  {% endblock %}
+
+            

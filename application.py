@@ -342,10 +342,10 @@ def update():
     print(toUpdate)
     # looks up item
 
-    result = invLookup(toUpdate['upc'],toUpdate['store'])['data'][0]
     db = get_db()
     # updates inventory database with new info
     try:
+        result = invLookup(toUpdate['upc'],toUpdate['store'])['data'][0]
         db.execute('INSERT or REPLACE INTO inventory (upc, store, qty, price, name, datetime)\
         values (?, ?, ?, ?, ?, ?)', [toUpdate['upc'], toUpdate['store'], result['availabilityInStore'], result['packagePrice'], result['name'], str(datetime.now())])
     except KeyError:
@@ -409,11 +409,7 @@ def deals():
     groupbystores = request.args.get("groupbystores")
     q = 'SELECT *, itemdata.name as realname, ROUND(100.0*(1.0-((1.0*inventory.price)/(1.0*itemdata.salePrice))),2) as discount\
     from inventory INNER JOIN itemData on inventory.upc = itemData.upc INNER JOIN storestosearch ON inventory.store = storestosearch.id\
-    INNER JOIN stores on stores.id = storestosearch.id WHERE discount>? AND saleprice > 0 AND QTY > 0 AND uid=?'
-    if groupbystores=="on":
-         q += " ORDER BY stores.city"
-    else: 
-         q += " ORDER BY itemData.sku"
+    INNER JOIN stores on stores.id = storestosearch.id WHERE discount>? AND saleprice > 0 AND QTY > 0 AND uid=? ORDER BY itemdata.name'
     deals = query_db(q,[discount,session["user_id"]])
     return render_template('deals.html', deals=deals)
 
@@ -612,4 +608,4 @@ def help():
 if __name__ == "__main__":
     app.run(host = '0.0.0.0', port=8080)
 
-# app.run(host = '0.0.0.0', port=8080, debug=True)
+app.run(host = '0.0.0.0', port=8080, debug=True)

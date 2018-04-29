@@ -2,19 +2,21 @@
 
 <h2>Deals in your stores</h2>
 <form id="deals" action="/deals" method="get">
-    <div class="switch">
-        <label>
-      Items
-      <input type="checkbox" id="groupby" name="groupbystores">
-      <span class="lever"></span>
-      Stores
-    </label>
-    </div>
-    <br> Minimum Discount (0-100%): <input type="text" id="discount" name="discount" value="75">
-    <button>Submit</button>
-</form>
 
-<a href="#" id="showTables" onclick="showTables()">Show Table</a> | <a href="#" id="showItems" onclick="showItems()">Show Items</a>
+
+
+Minimum Discount (0-100%): <input type="text" id="discount" name="discount" value="75">
+        <button class="waves-effect waves-light amber darken-2 btn-large">Submit</button><br><br>
+        <a href="#" id="showTables" onclick="showTables()">Show Table</a> | <a href="#" id="showItems" onclick="showItems()">Show Items</a>
+
+
+
+
+</form>
+<br>
+
+
+<br>
 <div class="items">
     {% for deal in deals %}
 

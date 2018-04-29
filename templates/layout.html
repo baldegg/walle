@@ -30,9 +30,9 @@
                     <li><a href="/deals">Deals</a></li>
                     <li><a href="/pricedrops">Drops</a></li>
                     <li><a href="/shoppinglist">Shopping List</a></li>
-                    <li><a href="/help">  <i class="material-icons">help</i></a></li>
-                </ul>
+                    <li><a href="#modal1" class="modal-trigger"> <i class="material-icons">help</i></a></li>
 
+                </ul>
                 {% endif %}
                 <ul id="nav-mobile" class="right hide-on-med-and-down">
                     <li> {% if session.username %} Logged in as: {{session.username}} {% endif %}
@@ -59,7 +59,24 @@
                     <h1 class="m">WORLD</h1>
                 </a>
             </center>
-            <br> {% block body %} {% endblock %}
+                    
+                       <div id="modal1" class="modal">
+    <div class="modal-content">
+        <h2>How to Use</h2>
+        <ol>
+            <li>On the home screen, enter your zip code and press "Update Stores" to populate your list of stores to search.</li>
+            <li>Paste a list of SKUs, Walmart.com links, or Brickseek links in the text area under "Items to Search" and press "Update Items".</li>
+            <li>Once your lists of items and stores are populated, press the orange button at the top of the home page to search for all item at all stores.</li>
+            <li>View the color coded results page. Click the <i class="material-icons">remove_red_eye</i> icon to hide items or the <i class="material-icons">list</i> icon to add the item to your shopping list.</li>
+        </ol>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Got it!</a>
+    </div>
+</div>
+
+
+<br> {% block body %} {% endblock %}
 
 
         </div>

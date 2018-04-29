@@ -3,7 +3,7 @@
 $(document).ready(function() {
   //make tables sortable
   $('.tablesorter').tablesorter();
-
+    $('.modal').modal();
   //enables check/uncheck all boxes 
   $('.masterCheck').click(function() {
     $(this).closest('table').find('.slaveCheck').each(function() {
@@ -32,7 +32,8 @@ function updateInv() {
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       var updated = JSON.parse(this.responseText);
-            $(document.activeElement)[0].innerHTML = "<i class='refresh material-icons'>sync_problem</i>"
+      console.log(updated);
+      $(document.activeElement)[0].innerHTML = "<i class='refresh material-icons'>sync_problem</i>"
       $(document.activeElement).parent().siblings("#qty")[0].innerText = updated['qty'];
       $(document.activeElement).parent().siblings('#price')[0].innerText = "$" + updated['price'];
       $(document.activeElement).parent().siblings("#timestamp")[0].innerText = updated['timestamp'];
@@ -50,11 +51,17 @@ function updateShoppingListInv(upc, store) {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
+      if (this.responseText !="Deleted"){
       var updated = JSON.parse(this.responseText);
-      
       $(document.activeElement).siblings("#qty")[0].innerText = updated['qty'];
       $(document.activeElement).siblings("#price")[0].innerText = "$" + updated['price'];
       $(document.activeElement).siblings("#timestamp")[0].innerText = updated['timestamp'];
+      }
+      else{
+        console.log("poop")
+      $(document.activeElement).siblings("#qty")[0].innerText('0'); 
+      $(document.activeElement).parentElement.css('color', 'red'); 
+      }
     }
   };
   xhttp.open("POST", "/update", true);
