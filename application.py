@@ -324,7 +324,7 @@ def search():
     db.commit()
     # collects newly acquired data to present to user as results page
     inv = query_db('SELECT inventory.upc as upc, itemData.sku, store, street, city, state, qty, price, datetime, msrp, thumbnailImage, itemData.name, salePrice, ROUND(100.0*(1.0-((1.0*inventory.price)/(1.0*itemdata.salePrice))),2) as discount FROM inventory \
-            INNER JOIN itemData ON itemData.upc = inventory.upc INNER JOIN stores ON inventory.store = stores.id INNER JOIN itemsToSearch on itemData.sku=itemstoSearch.sku INNER JOIN storesToSearch on stores.id = storesToSearch.id WHERE qty > 0 AND storesToSearch.uid = ? ORDER BY upc', [session["user_id"]])
+            INNER JOIN itemData ON itemData.upc = inventory.upc INNER JOIN stores ON inventory.store = stores.id INNER JOIN itemsToSearch on itemData.sku=itemstoSearch.sku INNER JOIN storesToSearch on itemsToSearch.uid = storesToSearch.uid WHERE qty > 0 AND storesToSearch.uid = ? ORDER BY upc', [session["user_id"]])
     # if looking up a single sku from item page, redirect to the page we came from with updated data
     if request.args.get('sku'):
         return redirect(request.referrer)
@@ -608,4 +608,4 @@ def help():
 if __name__ == "__main__":
     app.run(host = '0.0.0.0', port=80)
 
-# app.run(host = '0.0.0.0', port=8080, debug=True)
+app.run(host = '0.0.0.0', port=8080, debug=True)
