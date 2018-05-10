@@ -70,8 +70,8 @@ function updateShoppingListInv(upc, store) {
 
 
 
-function updateStore() {
-  var upc = $(document.activeElement).parent().parent().children()[4].innerText;
+function updateStore(upc) {
+  var upc = upc
   var store = $('#store')[0].innerText;
   var data = {
     "store": store,
@@ -82,9 +82,9 @@ function updateStore() {
     if (this.readyState == 4 && this.status == 200) {
       console.log(this.responseText);
       var updated = JSON.parse(this.responseText);
-      $(document.activeElement).parent().parent().children()[5].innerText = updated['qty'];
-      $(document.activeElement).parent().parent().children()[6].innerText = "$" + updated['price'];
-      $(document.activeElement).parent().parent().children()[10].innerText = updated['timestamp'];
+      $(document.activeElement).parent().siblings("#qty")[0].innerText = updated['qty'];
+      $(document.activeElement).parent().siblings('#price')[0].innerText = "$" + updated['price'];
+      $(document.activeElement).parent().siblings("#timestamp")[0].innerText = updated['timestamp'];
     }
   };
   xhttp.open("POST", "/update", true);

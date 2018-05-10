@@ -36,7 +36,7 @@ sku: {{inv[0].sku}} | UPC: <a href="http://barcode.live/?upc={{inv[0].upc}}" id=
         <tbody>
             {% for item in inv %}
             <tr>
-                               <td><a href="#" onclick="addToShoppingList({{item.upc}},{{item.store}})"><i class="material-icons">list</i></a></td>
+                               <td>    <a href="#" onclick="addToShoppingList({{item.upc}},{{item.store}});return false"><i class="material-icons">list</i></a></td>
                 <td><a href="#" onclick="updateInv({{item.store}}); return false;"><i class ="refresh material-icons">autorenew</i></a></td>
                 <td><a href="/store?store={{item.store}}">{{item.store}}</a></td>
                 <td>{{item.city}}</td>

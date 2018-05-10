@@ -22,18 +22,19 @@
     <tbody>
         {% for item in inv %}
         <tr>
-            <td><a href="#" onclick="addToShoppingList({{item.upc}},{{item.store}})"><i class="material-icons">list</i></a></td>
-        <td><button class="waves-effect waves-light amber darken-2 btn-small" onclick="updateStore()">UPDATE</button></td>
+            <td>    <a href="#" onclick="addToShoppingList({{item.upc}},{{item.store}});return false"><i class="material-icons">list</i></a></td>
+        <td><button class="waves-effect waves-light amber darken-2 btn-small" onclick="updateStore({{item.upc}})">UPDATE</button></td>
         <td><img src="{{item.thumbnailImage}}" /></td>
         <td>{{item.name}}</td>
         <td><a href="/item?sku={{item.sku}}">{{item.sku}}</a></td>
         <td> <a href="http://barcode.live/?upc={{item.upc}}">{{item.upc}}</a></td>
-        <td>{{item.qty}}</td>
-        <td>${{item.price}}</td>
+        <td id="qty">{{item.qty}}</td>
+        <td id="price">${{item.price}}</td>
         <td>${{item.salePrice}}</td>
         <td style="background:rgba({{255-item.droppy/100*255}},{{item.droppy/100*255}},0,1)">{{item.droppy}}%</td>
         <td>{{item.categoryPath}}</td>
-        <td>{{item.datetime}}</td>
+        <td id="timestamp">{{item.datetime}}</td>
+        
         </tr>
         {%endfor%}
     </tbody>
