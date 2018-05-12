@@ -1,0 +1,47 @@
+{% extends "layout.html" %} 
+{% block title %} Browse Items{% endblock %} 
+{% block body %}
+<center>
+  <h2>Shopping List</h2>
+
+   <table id="shoppingList" class="tablesorter">
+        <thead>
+            <tr>
+                   <th>update</th>
+                <th>delete</th>
+                <th>name</th>
+                <th>store</th>
+                <th>city</th>
+                <th>state</th>
+                <th>address</th>
+                <th>stock</th>
+                <th>price</th>
+                <th>updated</th>
+
+            </tr>
+        </thead>
+        <tbody>
+              {% for item in yourlist %}
+            <tr>
+
+
+                               <td> <a href="#" onclick="updateShoppingListInv({{item.upc}},{{item.store}}); return false;"><i class ="refresh material-icons">autorenew</i></a></td>
+                <td>    <a href="#" onclick="deleteFromShoppingList({{item.upc}},{{item.store}}); return false;" ><i class =" delete material-icons">delete_forever</i></button></a></td>
+                <td><a href="/item?sku={{item.sku}}">{{item.fullname}}</td></a>
+                <td><a href="/store?store={{item.store}}">{{item.store}}</a></td>
+                <td>{{item.city}}</td>
+                <td>{{item.state}}</td>
+                <td>{{item.street}}</td>
+                <td id ="qty">{{item.qty}}</td>
+                <td id="price">${{item.price}}</td>
+                <td id="timestamp">{{item.datetime}}</td>
+
+            </tr>
+            {%endfor%}
+        </tbody>
+    </table>
+  
+
+  {% endblock %}
+
+            

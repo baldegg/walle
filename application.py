@@ -583,12 +583,12 @@ def reports():
 def shoppinglist():
     db = get_db()
     if request.method=="GET":
-        yourlist = query_db('SELECT * from shoppingList\
+        yourlist = query_db('SELECT *, itemdata.name as fullname from shoppingList\
                     INNER JOIN inventory on shoppinglist.upc=inventory.upc and shoppinglist.store=inventory.store\
                     INNER JOIN itemdata on itemdata.upc=shoppinglist.upc\
                     INNER JOIN stores on stores.id=shoppinglist.store\
-                    WHERE uid=?',[session["user_id"]])
-        return render_template('shoppinglist.html',yourlist=yourlist)
+                    WHERE uid=? ORDER BY store',[session["user_id"]])
+        return render_template('shoppinglist.1.html',yourlist=yourlist)
     elif request.method=="POST":
         if request.form.get("delete"):
             db.execute("DELETE FROM shoppinglist WHERE uid=? and upc=? and store=?",[session["user_id"],request.form.get("upc"),request.form.get("store")])
