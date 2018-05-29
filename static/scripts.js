@@ -53,9 +53,9 @@ function updateShoppingListInv(upc, store) {
     if (this.readyState == 4 && this.status == 200) {
       if (this.responseText !="Deleted"){
       var updated = JSON.parse(this.responseText);
-      $(document.activeElement).siblings("#qty")[0].innerText = updated['qty'];
-      $(document.activeElement).siblings("#price")[0].innerText = "$" + updated['price'];
-      $(document.activeElement).siblings("#timestamp")[0].innerText = updated['timestamp'];
+      $(document.activeElement).parent().siblings("#qty")[0].innerText = updated['qty'];
+      $(document.activeElement).parent().siblings("#price")[0].innerText = "$" + updated['price'];
+      $(document.activeElement).parent().siblings("#timestamp")[0].innerText = updated['timestamp'];
       }
       else{
         console.log("poop")
@@ -133,7 +133,7 @@ function deleteFromShoppingList(upc, store) {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-      $(document.activeElement).closest('div').css("display", "none");
+      $(document.activeElement).closest('tr').css("display", "none");
     }
   };
   xhttp.open("POST", "/shoppinglist", true);
