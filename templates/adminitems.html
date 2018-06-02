@@ -23,7 +23,7 @@
         <tr>
             <td><button onclick="confirmDelete()">Delete</button>
                 <button class="confirm" id="{{item.sku}}.del" onclick="adminDelete({{item.sku}})">Confirm</button></td>
-            <td><img src="{{item.thumbnailImage}}" /></td>
+            <td><img class="tablethumb" src="{{item.thumbnailImage}}" /></td>
             <td><a href="#" class="salePriceAdmin" data-type="text" data-pk="{{item.sku}}" data-url="/adminedit" id="salePrice">{{item.salePrice}}</a></td>
             <td><a href="/item?sku={{item.sku}}">{{item.sku}}</a></td>
             <td>{{item.name}}</td>

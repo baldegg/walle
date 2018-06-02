@@ -2,7 +2,7 @@
 
 <h2>Latest Price Drops</h2>
 {% for drop in yourdrops %}{% if drop[0] %}
-<img src="{{drop[0].thumbnailImage}}" \>
+<img class="thumb" src="{{drop[0].thumbnailImage}}" \>
 <h5><a href="/item?sku={{drop[0].sku}}">{{ drop[0].name }}</a></h5>{%endif%}
 <table class="dropTable">
     <thead>

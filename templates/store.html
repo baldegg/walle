@@ -24,7 +24,7 @@
         <tr>
             <td>    <a href="#" onclick="addToShoppingList({{item.upc}},{{item.store}});return false"><i class="material-icons">list</i></a></td>
         <td><button class="waves-effect waves-light amber darken-2 btn-small" onclick="updateStore({{item.upc}})">UPDATE</button></td>
-        <td><img src="{{item.thumbnailImage}}" /></td>
+        <td><img class="thumb" src="{{item.thumbnailImage}}" /></td>
         <td>{{item.name}}</td>
         <td><a href="/item?sku={{item.sku}}">{{item.sku}}</a></td>
         <td> <a href="http://barcode.live/?upc={{item.upc}}">{{item.upc}}</a></td>

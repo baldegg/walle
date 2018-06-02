@@ -1,6 +1,6 @@
 {% extends "layout.html" %} {% block title %} Results {% endblock %} {% block body %} {% for item in inv %}
 <div class="item {{item.sku}}" style="background:rgba({{255-item.discount/100*255}},{{item.discount/100*255}},0,.5)">
-    <img src="{{item.thumbnailImage}}" /><br> #
+    <img class="thumb" src="{{item.thumbnailImage}}" /><br> #
     <a href="/store?store={{item.store}}">{{item.store}}</a> - {{item.city}}<br> {{item.name}}
     <br> sku: <a href="/item?sku={{item.sku}}">{{item.sku}}</a> upc: {{item.upc}}<br> {{item.qty}} in stock - ${{item.price}}<br> {{item.discount}}% discount<br> {{item.datetime}}
     <br>

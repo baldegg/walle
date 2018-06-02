@@ -61,7 +61,7 @@
             <button class="confirm" onclick="adminDelete({{item.sku}})">Confirm</button></td>
             {%endif%}
             <td><button class="waves-effect waves-light amber darken-2 btn-small" id="{{item.sku}}.add" onclick="addItem()">ADD</button></td>
-            <td><img src="{{item.thumbnailImage}}" /></td>
+            <td><img class="thumb" src="{{item.thumbnailImage}}" /></td>
             <td>{{item.count}}</td>
             <td>{{item.min}}</td>
             <td>{{item.salePrice}}</td>

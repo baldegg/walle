@@ -177,3 +177,8 @@ td input {
 h2 {
     text-align:center;
 }
+
+.thumb{
+    height:100px;
+    width:100px;
+}

@@ -1,6 +1,6 @@
 {% extends "layout.html" %} {% block body %}
 
-<img src="{{inv[0].thumbnailImage}}" /><br>
+<img class="thumb" src="{{inv[0].thumbnailImage}}" /><br>
 <h4>{{inv[0].name}}</h4>
 sku: {{inv[0].sku}} | UPC: <a href="http://barcode.live/?upc={{inv[0].upc}}" id="upc">{{inv[0].upc}}</a> <br> MSRP: {{inv[0].MSRP}} | Sale Price: {{inv[0].salePrice}}<br>
 <a href="http://www.walmart.com/ip/{{inv[0].sku}}">Walmart</a> | <a href="https://brickseek.com/walmart-inventory-checker?sku={{inv[0].sku}}">Brickseek</a> | <a href="https://www.ebay.com/sch/i.html?LH_Complete=1&LH_Sold=1&_nkw={{inv[0].upc}}&rt=nc&LH_ItemCondition=3">eBay Solds</a><br>{%if everything%} Showing all inventory. <br>
